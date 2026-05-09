@@ -1,0 +1,31 @@
+[
+  {
+    "id": "armas_anas",
+    "nome": "Armas anãs",
+    "criterios": [
+      {
+        "campo": "nome",
+        "contem": [
+          "machado",
+          "martelo",
+          "marreta",
+          "picareta"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "armas_marinhas",
+    "nome": "Armas marinhas",
+    "criterios": [
+      {
+        "campo": "nome",
+        "igual": [
+          "azagaia",
+          "lança",
+          "tridente"
+        ]
+      }
+    ]
+  }
+]

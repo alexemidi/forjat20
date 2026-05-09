@@ -1,0 +1,30 @@
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.field span {
+  color: #5f534d;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.field input,
+.field select {
+  background: #fff;
+  border: 1px solid #cfc4bd;
+  border-radius: 6px;
+  color: #231f1c;
+  font: inherit;
+  min-height: 40px;
+  min-width: 0;
+  padding: 0 10px;
+  width: 100%;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #7a2f23;
+  outline: 2px solid #e8c9bf;
+}

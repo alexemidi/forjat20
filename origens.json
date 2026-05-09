@@ -1,0 +1,745 @@
+{
+  "origens": [
+    {
+      "nome": "Acólito",
+      "itens": [
+        "Símbolo sagrado",
+        "Traje de sacerdote"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Cura",
+          "Religião",
+          "Vontade"
+        ],
+        "poderes": [
+          "Medicina",
+          "Vontade de Ferro"
+        ],
+        "poder_unico": {
+          "nome": "Membro da Igreja",
+          "descricao": "Você consegue hospedagem confortável e informação em qualquer templo de sua divindade, para você e seus aliados."
+        }
+      }
+    },
+    {
+      "nome": "Amigo dos Animais",
+      "itens": [
+        "Cão de caça, Cavalo, Pônei ou Trobo (escolha um)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Adestramento",
+          "Cavalgar"
+        ],
+        "poderes": [],
+        "poder_unico": {
+          "nome": "Amigo Especial",
+          "descricao": "Você recebe +5 em testes de Adestramento com animais. Além disso, possui um animal de estimação que o auxilia e o acompanha em suas aventuras. Em termos de jogo, é um parceiro que fornece +2 em uma perícia a sua escolha (exceto Luta ou Pontaria e aprovada pelo mestre) e não conta em seu limite de parceiros."
+        }
+      }
+    },
+    {
+      "nome": "Amnésico",
+      "itens": [
+        "Um ou mais itens (somando até T$ 500), aprovados pelo mestre, que podem ser uma pista misteriosa do seu passado"
+      ],
+      "beneficios": {
+        "pericias": [],
+        "poderes": [],
+        "poder_unico": {
+          "nome": "Lembranças Graduais",
+          "descricao": "Durante suas aventuras, em determinados momentos a critério do mestre, você pode fazer um teste de Sabedoria (CD 10) para reconhecer pessoas, criaturas ou lugares que tenha encontrado antes de perder a memória."
+        }
+      }
+    },
+    {
+      "nome": "Aristocrata",
+      "itens": [
+        "Joia de família no valor de T$ 300",
+        "Traje da corte"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Diplomacia",
+          "Enganação",
+          "Nobreza"
+        ],
+        "poderes": [
+          "Comandar"
+        ],
+        "poder_unico": {
+          "nome": "Sangue Azul",
+          "descricao": "Você tem alguma influência política, suficiente para ser tratado com mais leniência pela guarda, conseguir uma audiência com o nobre local etc."
+        }
+      }
+    },
+    {
+      "nome": "Artesão",
+      "itens": [
+        "Instrumentos de ofício (qualquer)",
+        "Um item que você possa fabricar de até T$ 50"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Ofício",
+          "Vontade"
+        ],
+        "poderes": [
+          "Sortudo"
+        ],
+        "poder_unico": {
+          "nome": "Frutos do Trabalho",
+          "descricao": "No início de cada aventura, você recebe até 5 itens gerais que possa fabricar num valor total de até T$ 50. Esse valor aumenta para T$ 100 no patamar veterano, T$ 300 no campeão e T$ 500 no lenda."
+        }
+      }
+    },
+    {
+      "nome": "Artista",
+      "itens": [
+        "Estojo de disfarces ou um instrumento musical a sua escolha"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Atuação",
+          "Enganação"
+        ],
+        "poderes": [
+          "Atraente",
+          "Sortudo",
+          "Torcida"
+        ],
+        "poder_unico": {
+          "nome": "Dom Artístico",
+          "descricao": "Você recebe +2 em testes de Atuação, e recebe o dobro de tibares em apresentações."
+        }
+      }
+    },
+    {
+      "nome": "Assistente de Laboratório",
+      "itens": [
+        "Instrumentos de Ofício (alquimista)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Ofício (alquimista)",
+          "Misticismo"
+        ],
+        "poderes": [
+          "Venefício",
+          "um poder da Tormenta a sua escolha"
+        ],
+        "poder_unico": {
+          "nome": "Esse Cheiro...",
+          "descricao": "Você recebe +2 em Fortitude e detecta automaticamente a presença (mas não a localização ou natureza) de itens alquímicos em alcance curto."
+        }
+      }
+    },
+    {
+      "nome": "Batedor",
+      "itens": [
+        "Barraca",
+        "Equipamento de viagem",
+        "Uma arma simples ou marcial de ataque à distância"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Furtividade",
+          "Percepção",
+          "Sobrevivência"
+        ],
+        "poderes": [
+          "Estilo de Disparo",
+          "Sentidos Aguçados"
+        ],
+        "poder_unico": {
+          "nome": "À Prova de Tudo",
+          "descricao": "Você não sofre penalidade em deslocamento e Sobrevivência por clima ruim e por terreno difícil natural."
+        }
+      }
+    },
+    {
+      "nome": "Capanga",
+      "itens": [
+        "Tatuagem ou outro adereço de sua gangue (+1 em Intimidação)",
+        "Uma arma simples corpo a corpo"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Luta",
+          "Intimidação"
+        ],
+        "poderes": [
+          "um poder de combate a sua escolha"
+        ],
+        "poder_unico": {
+          "nome": "Confissão",
+          "descricao": "Você pode usar Intimidação para interrogar sem custo e em um minuto (veja Investigação)."
+        }
+      }
+    },
+    {
+      "nome": "Charlatão",
+      "itens": [
+        "Estojo de disfarces",
+        "Joia falsificada (valor aparente de T$ 100, sem valor real)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Enganação",
+          "Jogatina"
+        ],
+        "poderes": [
+          "Aparência Inofensiva",
+          "Sortudo"
+        ],
+        "poder_unico": {
+          "nome": "Alpinista Social",
+          "descricao": "Você pode substituir testes de Diplomacia por testes de Enganação."
+        }
+      }
+    },
+    {
+      "nome": "Circense",
+      "itens": [
+        "Três bolas coloridas para malabarismo (+1 em Atuação)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Acrobacia",
+          "Atuação",
+          "Reflexos"
+        ],
+        "poderes": [
+          "Acrobático",
+          "Torcida"
+        ],
+        "poder_unico": {
+          "nome": "Truque de Mágica",
+          "descricao": "Você pode lançar Explosão de Chamas, Hipnotismo e Queda Suave, mas apenas com o aprimoramento Truque. Esta não é uma habilidade mágica — os efeitos provêm de prestidigitação."
+        }
+      }
+    },
+    {
+      "nome": "Criminoso",
+      "itens": [
+        "Estojo de disfarces ou gazua"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Enganação",
+          "Furtividade",
+          "Ladinagem"
+        ],
+        "poderes": [
+          "Venefício"
+        ],
+        "poder_unico": {
+          "nome": "Punguista",
+          "descricao": "Você pode fazer testes de Ladinagem para sustento (como a perícia Ofício), mas em apenas um dia. Se passar, recebe o dobro do dinheiro, mas, se falhar, pode ter problemas com a lei (a critério do mestre)."
+        }
+      }
+    },
+    {
+      "nome": "Curandeiro",
+      "itens": [
+        "Bálsamo restaurador x2",
+        "Maleta de medicamentos"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Cura",
+          "Vontade"
+        ],
+        "poderes": [
+          "Medicina",
+          "Venefício"
+        ],
+        "poder_unico": {
+          "nome": "Médico de Campo",
+          "descricao": "Você soma sua Sabedoria aos PV restaurados por suas habilidades e itens mundanos de cura."
+        }
+      }
+    },
+    {
+      "nome": "Eremita",
+      "itens": [
+        "Barraca",
+        "Equipamento de viagem"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Misticismo",
+          "Religião",
+          "Sobrevivência"
+        ],
+        "poderes": [
+          "Lobo Solitário"
+        ],
+        "poder_unico": {
+          "nome": "Busca Interior",
+          "descricao": "Quando você e seus companheiros estão diante de um mistério, incapazes de prosseguir, você pode gastar 1 PM para meditar sozinho durante algum tempo e receber uma dica do mestre."
+        }
+      }
+    },
+    {
+      "nome": "Escravo",
+      "itens": [
+        "Algemas",
+        "Uma ferramenta pesada (mesmas estatísticas de uma maça)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Atletismo",
+          "Fortitude",
+          "Furtividade"
+        ],
+        "poderes": [
+          "Vitalidade"
+        ],
+        "poder_unico": {
+          "nome": "Desejo de Liberdade",
+          "descricao": "Ninguém voltará a torná-lo um escravo! Você recebe +5 em testes contra a manobra agarrar e efeitos de movimento."
+        }
+      }
+    },
+    {
+      "nome": "Estudioso",
+      "itens": [
+        "Coleção de livros (+1 em Conhecimento, Guerra, Misticismo ou Nobreza, a sua escolha)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Conhecimento",
+          "Guerra",
+          "Misticismo"
+        ],
+        "poderes": [
+          "Aparência Inofensiva"
+        ],
+        "poder_unico": {
+          "nome": "Palpite Fundamentado",
+          "descricao": "Quando vai fazer um teste de perícia originalmente baseada em Inteligência ou Sabedoria, você pode gastar 2 PM para substituí-la por Conhecimento."
+        }
+      }
+    },
+    {
+      "nome": "Fazendeiro",
+      "itens": [
+        "Carroça",
+        "Uma ferramenta agrícola (mesmas estatísticas de uma lança)",
+        "10 rações de viagem",
+        "Um animal não combativo (como uma galinha, porco ou ovelha)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Adestramento",
+          "Cavalgar",
+          "Ofício",
+          "Sobrevivência"
+        ],
+        "poderes": [
+          "Ginete"
+        ],
+        "poder_unico": {
+          "nome": "Água no Feijão",
+          "descricao": "Você não sofre a penalidade de –5 e não gasta matéria-prima adicional para fabricar pratos para cinco pessoas."
+        }
+      }
+    },
+    {
+      "nome": "Forasteiro",
+      "itens": [
+        "Equipamento de viagem",
+        "Instrumento musical exótico (+1 em uma perícia de Carisma aprovada pelo mestre)",
+        "Traje estrangeiro"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Cavalgar",
+          "Pilotagem",
+          "Sobrevivência"
+        ],
+        "poderes": [
+          "Lobo Solitário"
+        ],
+        "poder_unico": {
+          "nome": "Cultura Exótica",
+          "descricao": "Por sua diferente visão de mundo, você encontra soluções inesperadas. Quando vai fazer um teste de perícia que requer treinamento, você pode gastar 1 PM para ignorar esse requerimento para esse teste."
+        }
+      }
+    },
+    {
+      "nome": "Gladiador",
+      "itens": [
+        "Uma arma marcial ou exótica",
+        "Um item sem valor recebido de um admirador"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Atuação",
+          "Luta"
+        ],
+        "poderes": [
+          "Atraente",
+          "Torcida",
+          "um poder de combate a sua escolha"
+        ],
+        "poder_unico": {
+          "nome": "Pão e Circo",
+          "descricao": "Por seu treino em combates de exibição, você sabe “bater sem machucar”. Pode escolher causar dano não letal sem sofrer a penalidade de –5."
+        }
+      }
+    },
+    {
+      "nome": "Guarda",
+      "itens": [
+        "Apito",
+        "Insígnia da milícia",
+        "Uma arma marcial"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Investigação",
+          "Luta",
+          "Percepção"
+        ],
+        "poderes": [
+          "Investigador",
+          "um poder de combate a sua escolha"
+        ],
+        "poder_unico": {
+          "nome": "Detetive",
+          "descricao": "Você pode gastar 1 PM para substituir testes de Percepção e Intuição por testes de Investigação até o fim da cena."
+        }
+      }
+    },
+    {
+      "nome": "Herdeiro",
+      "itens": [
+        "Um símbolo de sua herança, como um anel de sinete ou manto cerimonial"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Misticismo",
+          "Nobreza",
+          "Ofício"
+        ],
+        "poderes": [
+          "Comandar"
+        ],
+        "poder_unico": {
+          "nome": "Herança",
+          "descricao": "Você herdou um item de preço de até T$ 1.000. Você pode escolher este poder duas vezes, para um item de até T$ 2.000."
+        }
+      }
+    },
+    {
+      "nome": "Herói Camponês",
+      "itens": [
+        "Instrumentos de ofício ou uma arma simples",
+        "Traje de plebeu"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Adestramento",
+          "Ofício"
+        ],
+        "poderes": [
+          "Sortudo",
+          "Surto Heroico",
+          "Torcida"
+        ],
+        "poder_unico": {
+          "nome": "Coração Heroico",
+          "descricao": "Você recebe +3 pontos de mana. Quando atinge um novo patamar (no 5º, 11º e 17º níveis), recebe +3 PM."
+        }
+      }
+    },
+    {
+      "nome": "Marujo",
+      "itens": [
+        "T$ 2d6 (seu último salário)",
+        "Corda"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Atletismo",
+          "Jogatina",
+          "Pilotagem"
+        ],
+        "poderes": [
+          "Acrobático"
+        ],
+        "poder_unico": {
+          "nome": "Passagem de Navio",
+          "descricao": "Você consegue transporte marítimo para você e seus aliados, sem custos, desde que todos paguem com trabalho (passar em pelo menos um teste de perícia adequado durante a viagem)."
+        }
+      }
+    },
+    {
+      "nome": "Mateiro",
+      "itens": [
+        "Arco curto",
+        "Barraca",
+        "Equipamento de viagem",
+        "20 flechas"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Atletismo",
+          "Furtividade",
+          "Sobrevivência"
+        ],
+        "poderes": [
+          "Lobo Solitário",
+          "Sentidos Aguçados"
+        ],
+        "poder_unico": {
+          "nome": "Vendedor de Carcaças",
+          "descricao": "Você pode extrair recursos de criaturas em um minuto, em vez de uma hora, e recebe +5 no teste."
+        }
+      }
+    },
+    {
+      "nome": "Membro de Guilda",
+      "itens": [
+        "Gazua ou instrumentos de ofício"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Diplomacia",
+          "Enganação",
+          "Misticismo",
+          "Ofício"
+        ],
+        "poderes": [
+          "Foco em Perícia"
+        ],
+        "poder_unico": {
+          "nome": "Rede de Contatos",
+          "descricao": "Graças à influência de sua guilda, você pode usar Diplomacia para interrogar sem custo e em um minuto (veja Investigação)."
+        }
+      }
+    },
+    {
+      "nome": "Mercador",
+      "itens": [
+        "Carroça",
+        "Trobo",
+        "Mercadorias para vender no valor de T$ 100"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Diplomacia",
+          "Intuição",
+          "Ofício"
+        ],
+        "poderes": [
+          "Proficiência",
+          "Sortudo"
+        ],
+        "poder_unico": {
+          "nome": "Negociação",
+          "descricao": "Você pode vender itens 10% mais caro (não cumulativo com barganha)."
+        }
+      }
+    },
+    {
+      "nome": "Minerador",
+      "itens": [
+        "Gemas preciosas no valor de T$ 100",
+        "Picareta"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Atletismo",
+          "Fortitude",
+          "Ofício (minerador)"
+        ],
+        "poderes": [
+          "Ataque Poderoso",
+          "Sentidos Aguçados"
+        ],
+        "poder_unico": {
+          "nome": "Escavador",
+          "descricao": "Você se torna proficiente em picaretas, causa +1 de dano com elas e não é afetado por terreno difícil em masmorras e subterrâneos."
+        }
+      }
+    },
+    {
+      "nome": "Nômade",
+      "itens": [
+        "Bordão",
+        "Equipamento de viagem"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Cavalgar",
+          "Pilotagem",
+          "Sobrevivência"
+        ],
+        "poderes": [
+          "Lobo Solitário",
+          "Sentidos Aguçados"
+        ],
+        "poder_unico": {
+          "nome": "Mochileiro",
+          "descricao": "Seu limite de carga aumenta em 5 espaços."
+        }
+      }
+    },
+    {
+      "nome": "Pivete",
+      "itens": [
+        "Gazua",
+        "Traje de plebeu",
+        "Um animal urbano (como um cão, gato, rato ou pombo)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Furtividade",
+          "Iniciativa",
+          "Ladinagem"
+        ],
+        "poderes": [
+          "Acrobático",
+          "Aparência Inofensiva"
+        ],
+        "poder_unico": {
+          "nome": "Quebra-galho",
+          "descricao": "Em cidades ou metrópoles, você pode comprar qualquer item mundano não superior por metade do preço normal. Esses itens não podem ser matérias-primas e não podem ser revendidos (são velhos, sujos, furtados...)."
+        }
+      }
+    },
+    {
+      "nome": "Refugiado",
+      "itens": [
+        "Um item estrangeiro de até T$ 100"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Fortitude",
+          "Reflexos",
+          "Vontade"
+        ],
+        "poderes": [
+          "Vontade de Ferro"
+        ],
+        "poder_unico": {
+          "nome": "Estoico",
+          "descricao": "Sua condição de descanso é uma categoria acima do padrão pela situação (normal em condições ruins, confortável em condições normais e luxuosa em condições confortáveis ou melhores). Veja as regras de recuperação na página 106."
+        }
+      }
+    },
+    {
+      "nome": "Seguidor",
+      "itens": [
+        "Um item recebido de seu mestre de até T$ 100"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Adestramento",
+          "Ofício"
+        ],
+        "poderes": [
+          "Proficiência",
+          "Surto Heroico"
+        ],
+        "poder_unico": {
+          "nome": "Antigo Mestre",
+          "descricao": "Você ainda mantém contato com o herói que costumava servir. Uma vez por aventura, ele surge para ajudá-lo por uma cena. Ele é um parceiro mestre de um tipo a sua escolha (definido ao obter este poder) que não conta em seu limite de aliados."
+        }
+      }
+    },
+    {
+      "nome": "Selvagem",
+      "itens": [
+        "Uma arma simples",
+        "Um pequeno animal de estimação como um pássaro ou esquilo"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Percepção",
+          "Reflexos",
+          "Sobrevivência"
+        ],
+        "poderes": [
+          "Lobo Solitário",
+          "Vitalidade"
+        ],
+        "poder_unico": {
+          "nome": "Vida Rústica",
+          "descricao": "Você come coisas que fariam um avestruz vomitar (sendo imune a efeitos prejudiciais de itens ingeríveis) e também consegue descansar nos lugares mais desconfortáveis (mesmo dormindo ao relento, sua recuperação de PV e PM nunca é inferior a seu próprio nível)."
+        }
+      }
+    },
+    {
+      "nome": "Soldado",
+      "itens": [
+        "Uma arma marcial",
+        "Um uniforme militar",
+        "Uma insígnia de seu exército"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Fortitude",
+          "Guerra",
+          "Luta",
+          "Pontaria"
+        ],
+        "poderes": [
+          "um poder de combate a sua escolha"
+        ],
+        "poder_unico": {
+          "nome": "Influência Militar",
+          "descricao": "Você fez amigos nas forças armadas. Onde houver acampamentos ou bases militares, você pode conseguir hospedagem e informações para você e seus aliados."
+        }
+      }
+    },
+    {
+      "nome": "Taverneiro",
+      "itens": [
+        "Rolo de macarrão ou martelo de carne (mesmas estatísticas de uma clava)",
+        "Uma panela",
+        "Um avental",
+        "Uma caneca",
+        "Um pano sujo"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Diplomacia",
+          "Jogatina",
+          "Ofício (cozinheiro)"
+        ],
+        "poderes": [
+          "Proficiência",
+          "Vitalidade"
+        ],
+        "poder_unico": {
+          "nome": "Gororoba",
+          "descricao": "Você não sofre a penalidade de –5 para fabricar um prato especial adicional."
+        }
+      }
+    },
+    {
+      "nome": "Trabalhador",
+      "itens": [
+        "Uma ferramenta pesada (mesmas estatísticas de uma maça ou lança, a sua escolha)"
+      ],
+      "beneficios": {
+        "pericias": [
+          "Atletismo",
+          "Fortitude"
+        ],
+        "poderes": [
+          "Atlético"
+        ],
+        "poder_unico": {
+          "nome": "Esforçado",
+          "descricao": "Você não teme trabalho duro, nem prazos apertados. Você recebe um bônus de +2 em todos os testes de perícias estendidos (incluindo perigos complexos)."
+        }
+      }
+    }
+  ]
+}

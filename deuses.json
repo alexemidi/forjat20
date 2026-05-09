@@ -1,0 +1,713 @@
+{
+  "deuses": [
+    {
+      "nome": "Aharadak",
+      "simbolo_sagrado": "Um olho macabro de pupila vertical e cercado de espinhos",
+      "canalizar_energia": "Negativa",
+      "arma_preferida": "Corrente de espinhos",
+      "devotos": {
+        "racas": [
+          "Todas"
+        ],
+        "classes": [
+          "Todas"
+        ]
+      },
+      "poderes_concedidos": [
+        "Afinidade com a Tormenta",
+        "Êxtase da Loucura",
+        "Percepção Temporal",
+        "Rejeição Divina",
+        "Corromper Equipamento",
+        "Espalhar a Corrupção",
+        "Júbilo na Dor",
+        "Mediador da Tempestade"
+      ],
+      "obrigacoes_restricoes": "No início de qualquer cena de ação, role 1d6. Com um resultado ímpar, você fica fascinado na primeira rodada, perdido em devaneios sobre a futilidade da vida."
+    },
+    {
+      "nome": "Allihanna",
+      "simbolo_sagrado": "Uma pequena árvore ou símbolo animal",
+      "canalizar_energia": "Positiva",
+      "arma_preferida": "Bordão",
+      "devotos": {
+        "racas": [
+          "Centauro",
+          "Ceratops",
+          "Dahllan",
+          "Duende",
+          "Eiradaan",
+          "Elfo",
+          "Elfo-do-mar",
+          "Galokk",
+          "Gnoll",
+          "Nagah",
+          "Ogro",
+          "Orc",
+          "Pteros",
+          "Sátiro",
+          "Sílfide",
+          "Tabrachi",
+          "Velocis",
+          "Voracis"
+        ],
+        "classes": [
+          "Bárbaro",
+          "Caçador",
+          "Druida",
+          "Treinador"
+        ]
+      },
+      "poderes_concedidos": [
+        "Compreender os Ermos",
+        "Dedo Verde",
+        "Descanso Natural",
+        "Voz da Natureza",
+        "Companheiro Silvestre",
+        "Espírito Animal",
+        "Estouro da Trobada",
+        "O Sol que nos Aquece",
+        "Trilha Desimpedida"
+      ],
+      "obrigacoes_restricoes": "Não pode usar armaduras ou escudos metálicos. Não pode descansar em cidades maiores que aldeia. Se fizer isso, não perder os poderes, mas também não recupera PV/PM."
+    },
+    {
+      "nome": "Arsenal",
+      "simbolo_sagrado": "Martelo de guerra e espada longa cruzados sobre um escudo",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Martelo de guerra",
+      "devotos": {
+        "racas": [
+          "Anão",
+          "Bugbear",
+          "Ceratops",
+          "Elfo-do-mar",
+          "Galokk",
+          "Hobgoblin",
+          "Kallyanach",
+          "Kaijin",
+          "Minotauro",
+          "Nezumi",
+          "Ogro",
+          "Orc",
+          "Tengu",
+          "Voracis",
+          "Yidishan"
+        ],
+        "classes": [
+          "Bárbaro",
+          "Cavaleiro",
+          "Guerreiro",
+          "Lutador"
+        ]
+      },
+      "poderes_concedidos": [
+        "Conjurar Arma",
+        "Coragem Total",
+        "Fé Guerreira",
+        "Sangue de Ferro",
+        "Armas da Destruição",
+        "Expurgar a Derrota",
+        "Ferramentas da Guerra",
+        "Vitória a qualquer custo"
+      ],
+      "obrigacoes_restricoes": "Proibido ser derrotado em qualquer combate ou disputa."
+    },
+    {
+      "nome": "Azgher",
+      "simbolo_sagrado": "Um sol dourado",
+      "canalizar_energia": "Positiva",
+      "arma_preferida": "Cimitarra",
+      "devotos": {
+        "racas": [
+          "Aggelus",
+          "Ceratops",
+          "Qareen"
+        ],
+        "classes": [
+          "Arcanista",
+          "Bárbaro",
+          "Caçador",
+          "Cavaleiro",
+          "Guerreiro",
+          "Nobre",
+          "Paladino"
+        ]
+      },
+      "poderes_concedidos": [
+        "Espada Solar",
+        "Fulgor Solar",
+        "Habitante do Deserto",
+        "Inimigo de Tenebra",
+        "Imolação Sagrada",
+        "O Sol que nos Aquece",
+        "Proeminência Solar",
+        "Resplendor Divino"
+      ],
+      "obrigacoes_restricoes": "Deve manter o rosto coberto e doar 20% de qualquer tesouro obtido a igreja."
+    },
+    {
+      "nome": "Hyninn",
+      "simbolo_sagrado": "Adaga atravessando uma máscara ou uma raposa",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Adaga",
+      "devotos": {
+        "racas": [
+          "Duende",
+          "Elfo-do-mar",
+          "Gnoll",
+          "Goblin",
+          "Harpia",
+          "Hynne",
+          "Kappa",
+          "Nagah",
+          "Naidora",
+          "Sátiro",
+          "Sílfide"
+        ],
+        "classes": [
+          "Bardo",
+          "Bucaneiro",
+          "Ladino",
+          "Inventor",
+          "Nobre"
+        ]
+      },
+      "poderes_concedidos": [
+        "Apostar com o Trapaceiro",
+        "Farsa do Fingidor",
+        "Forma de Macaco",
+        "Golpista Divino",
+        "A Ferramenta Certa",
+        "Armadilha Divina",
+        "Dom da Furtividade",
+        "O dobro ou nada"
+      ],
+      "obrigacoes_restricoes": "Deve realizar um ato furtivo ou criminoso por dia (CD 15 + metade do nível)."
+    },
+    {
+      "nome": "Kallyadranoch",
+      "simbolo_sagrado": "Escamas de cinco cores diferentes",
+      "canalizar_energia": "Negativa",
+      "arma_preferida": "Lança",
+      "devotos": {
+        "racas": [
+          "Elfo",
+          "Finntroll",
+          "Kallyanach",
+          "Kobolds",
+          "Medusa",
+          "Nagah",
+          "Naidora",
+          "Sulfure"
+        ],
+        "classes": [
+          "Arcanista",
+          "Cavaleiro",
+          "Guerreiro",
+          "Lutador",
+          "Nobre"
+        ]
+      },
+      "poderes_concedidos": [
+        "Aura de Medo",
+        "Escamas Dracônicas",
+        "Presas Primordiais",
+        "Servos do Dragão",
+        "Alimentar-se do Pavor",
+        "Baforada Dracônica",
+        "Poder Sem Limites",
+        "Temor Arcano",
+        "Terror Profundo"
+      ],
+      "obrigacoes_restricoes": "Para subir de nível, deve oferecer 20% da diferença de ouro inicial dentre os níveis como tributo. (Veja o cálculo abaixo)"
+    },
+    {
+      "nome": "Khalmyr",
+      "simbolo_sagrado": "Espada sobreposta a uma balança",
+      "canalizar_energia": "Positiva",
+      "arma_preferida": "Espada longa",
+      "devotos": {
+        "racas": [
+          "Aggelus",
+          "Anão",
+          "Kobolds",
+          "Tengu"
+        ],
+        "classes": [
+          "Cavaleiro",
+          "Guerreiro",
+          "Nobre",
+          "Paladino"
+        ]
+      },
+      "poderes_concedidos": [
+        "Coragem Total",
+        "Dom da Verdade",
+        "Espada Justiceira",
+        "Reparar Injustiça",
+        "Dom da Vontade",
+        "Jurista Divino",
+        "Pilar de Heredrimm",
+        "Quebrar Encanto"
+      ],
+      "obrigacoes_restricoes": "Não pode recusar ajudar inocentes e deve obedecer hierarquia da igreja."
+    },
+    {
+      "nome": "Lena",
+      "simbolo_sagrado": "Lua crescente prateada",
+      "canalizar_energia": "Positiva",
+      "arma_preferida": "Nenhuma",
+      "devotos": {
+        "racas": [
+          "Ceratops",
+          "Dahllan",
+          "Eiradaan",
+          "Qareen",
+          "Kappa",
+          "Kobolds",
+          "Pteros",
+          "Velocis"
+        ],
+        "classes": [
+          "Nobre",
+          "Paladino"
+        ]
+      },
+      "poderes_concedidos": [
+        "Ataque Piedoso",
+        "Aura Restauradora",
+        "Cura Gentil",
+        "Curandeira Perfeita",
+        "Companheiro Celeste",
+        "Curar o Espírito",
+        "Magia Piedosa",
+        "Transbordar Cura"
+      ],
+      "obrigacoes_restricoes": "Não pode causar dano letal a criaturas vivas."
+    },
+    {
+      "nome": "Lin-Wu",
+      "simbolo_sagrado": "Placa com dragão-serpente celestial",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Katana",
+      "devotos": {
+        "racas": [
+          "Anão",
+          "Kaijin",
+          "Kappa",
+          "Mashin",
+          "Tengu"
+        ],
+        "classes": [
+          "Cavaleiro",
+          "Guerreiro",
+          "Nobre",
+          "Paladino"
+        ]
+      },
+      "poderes_concedidos": [
+        "Coragem Total",
+        "Kiai Divino",
+        "Mente Vazia",
+        "Tradição de Lin-Wu",
+        "Cerimonialista Divino",
+        "Exaltar Honra",
+        "Jurista Divino",
+        "Mestre de Si",
+        "Saque Celestial"
+      ],
+      "obrigacoes_restricoes": "Proibido mentir, furtar ou enganar."
+    },
+    {
+      "nome": "Marah",
+      "simbolo_sagrado": "Coração vermelho",
+      "canalizar_energia": "Positiva",
+      "arma_preferida": "Nenhuma",
+      "devotos": {
+        "racas": [
+          "Aggelus",
+          "Elfo",
+          "Gnoll",
+          "Hynne",
+          "Qareen",
+          "Pteros",
+          "Sátiro",
+          "Velocis"
+        ],
+        "classes": [
+          "Bardo",
+          "Nobre",
+          "Paladino"
+        ]
+      },
+      "poderes_concedidos": [
+        "Aura de Paz",
+        "Dom da Esperança",
+        "Palavras de Bondade",
+        "Talento Artístico",
+        "Cancioneiro da Esperança",
+        "Companheiro Celeste",
+        "Discurso Conciliador",
+        "Remorso do Belicista"
+      ],
+      "obrigacoes_restricoes": "Não pode causar dano ou violência."
+    },
+    {
+      "nome": "Megalokk",
+      "simbolo_sagrado": "A garra de um monstro",
+      "canalizar_energia": "Negativa",
+      "arma_preferida": "Maça",
+      "devotos": {
+        "racas": [
+          "Bugbear",
+          "Centauro",
+          "Ceratops",
+          "Elfo-do-mar",
+          "Finntroll",
+          "Galokk",
+          "Gnoll",
+          "Goblin",
+          "Harpia",
+          "Hobgoblin",
+          "Kallyanach",
+          "Kobolds",
+          "Medusa",
+          "Minotauro",
+          "Nagah",
+          "Nezumi",
+          "Ogro",
+          "Orc",
+          "Sulfure",
+          "Tabrachi",
+          "Trog",
+          "Voracis",
+          "Yidishan"
+        ],
+        "classes": [
+          "Bárbaro",
+          "Caçador",
+          "Druida",
+          "Lutador",
+          "Treinador"
+        ]
+      },
+      "poderes_concedidos": [
+        "Olhar Amedrontador",
+        "Presas Primordiais",
+        "Urro Divino",
+        "Voz dos Monstros",
+        "Alimentar-se do Pavor",
+        "Armas da Selvageria",
+        "Chamado Monstruoso",
+        "Terror Profundo"
+      ],
+      "obrigacoes_restricoes": "Proibido usar perícias baseadas em Inteligência ou Carisma (exceto Adestramento e Intimidação) e não pode preparar ações, escolher 10/20 ou sustentar efeitos."
+    },
+    {
+      "nome": "Nimb",
+      "simbolo_sagrado": "Um dado de seis faces",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Variável (qualquer arma ou objeto)",
+      "devotos": {
+        "racas": [
+          "Duende",
+          "Gnoll",
+          "Goblin",
+          "Naidora",
+          "Orc",
+          "Qareen",
+          "Sátiro",
+          "Sílfide",
+          "Tabrachi",
+          "Yidishan"
+        ],
+        "classes": [
+          "Arcanista",
+          "Bárbaro",
+          "Bardo",
+          "Bucaneiro",
+          "Inventor",
+          "Ladino",
+          "Treinador"
+        ]
+      },
+      "poderes_concedidos": [
+        "Êxtase da Loucura",
+        "Poder Oculto",
+        "Sorte dos Loucos",
+        "Transmissão da Loucura",
+        "Magia Caótica",
+        "Nimb",
+        "O dobro ou nada",
+        "Só os Loucos Sabem"
+      ],
+      "obrigacoes_restricoes": "Sofre –5 em testes baseados em Carisma. No início de cada cena, 1 em 1d6 causa confusão."
+    },
+    {
+      "nome": "Oceano",
+      "simbolo_sagrado": "Uma concha",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Tridente",
+      "devotos": {
+        "racas": [
+          "Dahllan",
+          "Elfo-do-mar",
+          "Hynne",
+          "Kappa",
+          "Minotauro",
+          "Sereia/Tritão"
+        ],
+        "classes": [
+          "Bárbaro",
+          "Bucaneiro",
+          "Caçador",
+          "Druida",
+          "Treinador"
+        ]
+      },
+      "poderes_concedidos": [
+        "Anfíbio",
+        "Arsenal das Profundezas",
+        "Mestre dos Mares",
+        "Sopro do Mar",
+        "Barreira de Coral",
+        "Égide dos Mares",
+        "Golpe Tempestuoso",
+        "Mar Revolto",
+        "Navegador Sagrado"
+      ],
+      "obrigacoes_restricoes": "Só pode usar azagaia, lança, tridente e rede. Apenas armaduras leves. Não pode ficar longe do mar por mais de um mês."
+    },
+    {
+      "nome": "Sszzaas",
+      "simbolo_sagrado": "Uma naja vertendo veneno",
+      "canalizar_energia": "Negativa",
+      "arma_preferida": "Adaga",
+      "devotos": {
+        "racas": [
+          "Finntroll",
+          "Medusa",
+          "Nagah",
+          "Tabrachi"
+        ],
+        "classes": [
+          "Arcanista",
+          "Bardo",
+          "Bucaneiro",
+          "Inventor",
+          "Ladino",
+          "Nobre"
+        ]
+      },
+      "poderes_concedidos": [
+        "Astúcia da Serpente",
+        "Familiar Ofídico",
+        "Presas Venenosas",
+        "Sangue Ofídico",
+        "Dom dos Segredos",
+        "Magia Venenosa",
+        "Manto Ardiloso",
+        "Mordida de Víbora"
+      ],
+      "obrigacoes_restricoes": "Deve realizar um ato de traição ou corrupção por dia (CD 15 + metade do nível)."
+    },
+    {
+      "nome": "Tanna-Toh",
+      "simbolo_sagrado": "Pergaminho e pena",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Bordão",
+      "devotos": {
+        "racas": [
+          "Golem",
+          "Kliren",
+          "Mashin",
+          "Tengu"
+        ],
+        "classes": [
+          "Arcanista",
+          "Bardo",
+          "Inventor",
+          "Nobre",
+          "Paladino"
+        ]
+      },
+      "poderes_concedidos": [
+        "Conhecimento Enciclopédico",
+        "Mente Analítica",
+        "Pesquisa Abençoada",
+        "Voz da Civilização",
+        "Biblioteca Divina",
+        "Espírito do Conhecimento",
+        "Golpe Semântico",
+        "Palavra de Poder",
+        "Perceber Farsas"
+      ],
+      "obrigacoes_restricoes": "Nunca pode mentir ou esconder conhecimento e não pode recusar missões de busca por conhecimento."
+    },
+    {
+      "nome": "Tenebra",
+      "simbolo_sagrado": "Estrela negra de cinco pontas",
+      "canalizar_energia": "Negativa",
+      "arma_preferida": "Adaga",
+      "devotos": {
+        "racas": [
+          "Anão",
+          "Bugbear",
+          "Finntroll",
+          "Gnoll",
+          "Harpia",
+          "Hobgoblin",
+          "Kobolds",
+          "Medusa",
+          "Nagah",
+          "Nezumi",
+          "Qareen",
+          "Ogro",
+          "Orc",
+          "Osteon",
+          "Sulfure",
+          "Tabrachi",
+          "Trog"
+        ],
+        "classes": [
+          "Arcanista",
+          "Bardo",
+          "Druida",
+          "Ladino",
+          "Treinador"
+        ]
+      },
+      "poderes_concedidos": [
+        "Carícia Sombria",
+        "Manto da Penumbra",
+        "Visão nas Trevas",
+        "Zumbificar",
+        "Adaga Noturna",
+        "Armadura de Ossos",
+        "Passo Sombrio",
+        "Toque de Não Vida"
+      ],
+      "obrigacoes_restricoes": "Deve cobrir completamente o corpo durante o dia, sem exposição ao sol."
+    },
+    {
+      "nome": "Thwor",
+      "simbolo_sagrado": "Um grande punho fechado",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Machado de guerra",
+      "devotos": {
+        "racas": [
+          "Todas"
+        ],
+        "classes": [
+          "Todas"
+        ]
+      },
+      "poderes_concedidos": [
+        "Almejar o Impossível",
+        "Fúria Divina",
+        "Olhar Amedrontador",
+        "Tropas Duyshidakk",
+        "Alma de Mudança",
+        "O Futuro que vier disso",
+        "Terror Profundo",
+        "Ushultt",
+        "Troças Duyshidakk"
+      ],
+      "obrigacoes_restricoes": "Deve ser aceito como duyshidakk, buscar expansão goblinoide e evitar lutar contra eles."
+    },
+    {
+      "nome": "Thyatis",
+      "simbolo_sagrado": "Uma ave fênix",
+      "canalizar_energia": "Positiva",
+      "arma_preferida": "Espada longa",
+      "devotos": {
+        "racas": [
+          "Aggelus",
+          "Eiradaan"
+        ],
+        "classes": [
+          "Cavaleiro",
+          "Guerreiro",
+          "Inventor",
+          "Lutador",
+          "Paladino"
+        ]
+      },
+      "poderes_concedidos": [
+        "Ataque Piedoso",
+        "Dom da Imortalidade",
+        "Dom da Profecia",
+        "Dom da Ressurreição",
+        "Abraço da Fênix",
+        "Imolação Sagrada",
+        "Magia Piedosa",
+        "Redirecionar Destino"
+      ],
+      "obrigacoes_restricoes": "Não pode matar criaturas inteligentes."
+    },
+    {
+      "nome": "Valkaria",
+      "simbolo_sagrado": "Estátua de Valkaria ou seis faixas entrelaçadas",
+      "canalizar_energia": "Positiva",
+      "arma_preferida": "Mangual",
+      "devotos": {
+        "racas": [
+          "Todas"
+        ],
+        "classes": [
+          "Todas"
+        ]
+      },
+      "poderes_concedidos": [
+        "Almejar o Impossível",
+        "Armas da Ambição",
+        "Coragem Total",
+        "Liberdade Divina",
+        "Alma de Mudança",
+        "Andarilho Carregado",
+        "Aventureiro Inquieto",
+        "Convicção Ambiciosa"
+      ],
+      "obrigacoes_restricoes": "Não pode permanecer muito tempo no mesmo lugar e não pode casar ou formar união estável."
+    },
+    {
+      "nome": "Wynna",
+      "simbolo_sagrado": "Um anel metálico",
+      "canalizar_energia": "Qualquer",
+      "arma_preferida": "Adaga",
+      "devotos": {
+        "racas": [
+          "Duende",
+          "Elfo",
+          "Eiradaan",
+          "Golem",
+          "Kallyanach",
+          "Mashin",
+          "Nagah",
+          "Pteros",
+          "Qareen",
+          "Sátiro",
+          "Sílfide",
+          "Tengu"
+        ],
+        "classes": [
+          "Arcanista",
+          "Bardo",
+          "Treinador"
+        ]
+      },
+      "poderes_concedidos": [
+        "Bênção do Mana",
+        "Centelha Mágica",
+        "Escudo Mágico",
+        "Teurgista Místico",
+        "Belo Presente",
+        "Familiar Elemental",
+        "Poder do Vínculo",
+        "Sorvo de Mana"
+      ],
+      "obrigacoes_restricoes": "Não pode recusar ajudar inocentes e não pode matar seres mágicos ou conjuradores arcanos."
+    }
+  ]
+}

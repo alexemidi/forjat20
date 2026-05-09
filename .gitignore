@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.vite/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+*~
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local reference material and generated workspaces
+Tormenta 20/
+visual antigo/
+*.pdf
+*.docx
+

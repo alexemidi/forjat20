@@ -1,0 +1,1818 @@
+{
+  "schemaVersion": "0.2.0",
+  "categorias": [
+    {
+      "id": "arma",
+      "nome": "Arma"
+    },
+    {
+      "id": "armadura",
+      "nome": "Armadura"
+    },
+    {
+      "id": "escudo",
+      "nome": "Escudo"
+    },
+    {
+      "id": "esoterico",
+      "nome": "Esotérico"
+    },
+    {
+      "id": "ferramenta",
+      "nome": "Ferramenta"
+    },
+    {
+      "id": "vestuario",
+      "nome": "Vestuário"
+    }
+  ],
+  "melhorias": [
+    {
+      "id": "certeira",
+      "nome": "Certeira",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 nos testes de ataque.",
+      "efeitos": [
+        {
+          "tipo": "bonus_ataque_arma",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "pungente",
+      "nome": "Pungente",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+2 nos testes de ataque.",
+      "preRequisitos": [
+        {
+          "tipo": "melhoria",
+          "melhoriaId": "certeira"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "bonus_ataque_arma",
+          "bonus": 2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "cruel",
+      "nome": "Cruel",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 nas rolagens de dano.",
+      "efeitos": [
+        {
+          "tipo": "bonus_dano_arma",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "atroz",
+      "nome": "Atroz",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+2 nas rolagens de dano.",
+      "preRequisitos": [
+        {
+          "tipo": "melhoria",
+          "melhoriaId": "cruel"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "bonus_dano_arma",
+          "bonus": 2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "equilibrada",
+      "nome": "Equilibrada",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+2 em testes de manobras.",
+      "efeitos": [
+        {
+          "tipo": "bonus_manobra_arma",
+          "bonus": 2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "harmonizada",
+      "nome": "Harmonizada",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "Custo de uma habilidade de ataque escolhida diminui em -1 PM.",
+      "escolhas": [
+        {
+          "id": "habilidade",
+          "tipo": "habilidade_ataque",
+          "quantidade": 1
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "reducao_custo_habilidade_ataque",
+          "reducao": 1,
+          "escolha": "habilidade"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "injecao_alquimica",
+      "nome": "Injeção Alquímica",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "A arma armazena 2 doses e libera o efeito de um preparado ou água benta em ataque que acerte.",
+      "capacidade": {
+        "tipo": "dose_preparado_ou_agua_benta",
+        "quantidade": 2
+      },
+      "efeitos": [
+        {
+          "tipo": "arma_armazena_cargas",
+          "cargaTipo": "preparado_ou_agua_benta",
+          "capacidade": 2,
+          "recarga": {
+            "acao": "completa",
+            "consomeItem": true
+          }
+        },
+        {
+          "tipo": "aplicar_item_ao_acertar_ataque",
+          "itemTipo": "preparado_ou_agua_benta",
+          "gatilho": "ataque_com_arma_acerta",
+          "alvo": "alvo_do_ataque",
+          "consomeCarga": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "macica",
+      "nome": "Maciça",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 no multiplicador de crítico.",
+      "incompatibilidades": [
+        "precisa"
+      ],
+      "efeitos": [
+        {
+          "tipo": "bonus_multiplicador_critico",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "material_especial",
+      "nome": "Material Especial",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "Aplica as regras do material especial escolhido.",
+      "escolhas": [
+        {
+          "id": "materialEspecialId",
+          "tipo": "material_especial",
+          "quantidade": 1
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "aplicar_material_especial",
+          "escolha": "materialEspecialId",
+          "origemDados": "materiaisEspeciais"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    },
+    {
+      "id": "mira_telescopica",
+      "nome": "Mira Telescópica",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "Aumenta o alcance da arma.",
+      "efeitos": [
+        {
+          "tipo": "aumentar_alcance_arma",
+          "passos": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "precisa",
+      "nome": "Precisa",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 na margem de ameaça.",
+      "incompatibilidades": [
+        "macica"
+      ],
+      "efeitos": [
+        {
+          "tipo": "bonus_margem_ameaca",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "ajustada",
+      "nome": "Ajustada",
+      "categoriasIds": [
+        "armadura",
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "-1 na penalidade de armadura.",
+      "efeitos": [
+        {
+          "tipo": "reduzir_penalidade_armadura_item",
+          "valor": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos"
+      ]
+    },
+    {
+      "id": "sob_medida",
+      "nome": "Sob Medida",
+      "categoriasIds": [
+        "armadura",
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "-2 na penalidade de armadura para o usuário específico.",
+      "preRequisitos": [
+        {
+          "tipo": "melhoria",
+          "melhoriaId": "ajustada"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "reduzir_penalidade_armadura_item",
+          "valor": 2,
+          "condicao": "usuario_especifico"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos"
+      ]
+    },
+    {
+      "id": "delicada",
+      "nome": "Delicada",
+      "categoriasIds": [
+        "armadura"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "Permite aplicar 1 ponto de Destreza na Defesa.",
+      "restricoes": [
+        {
+          "tipo": "categoria_armadura",
+          "categoriaId": "pesada"
+        }
+      ],
+      "incompatibilidades": [
+        "reforcada"
+      ],
+      "efeitos": [
+        {
+          "tipo": "limite_atributo_defesa_armadura",
+          "atributoId": "des",
+          "limite": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras"
+      ]
+    },
+    {
+      "id": "espinhosa",
+      "nome": "Espinhosa",
+      "categoriasIds": [
+        "armadura"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "Causa dano de perfuração igual à Força ao agarrar ou ser agarrado.",
+      "efeitos": [
+        {
+          "tipo": "dano_condicional_agarrar",
+          "atributoId": "for",
+          "tipoDanoId": "perfuracao"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras"
+      ]
+    },
+    {
+      "id": "espinhoso",
+      "nome": "Espinhoso",
+      "categoriasIds": [
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "Aumenta o dano do ataque com escudo em um passo.",
+      "efeitos": [
+        {
+          "tipo": "aumentar_passo_dano_escudo",
+          "passos": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "escudos"
+      ]
+    },
+    {
+      "id": "polida",
+      "nome": "Polida",
+      "categoriasIds": [
+        "armadura",
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+5 na Defesa na primeira rodada.",
+      "efeitos": [
+        {
+          "tipo": "bonus_defesa_condicional",
+          "bonus": 5,
+          "duracao": "primeira_rodada"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos"
+      ]
+    },
+    {
+      "id": "reforcada",
+      "nome": "Reforçada",
+      "categoriasIds": [
+        "armadura",
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 na Defesa e +1 na penalidade de armadura.",
+      "incompatibilidades": [
+        "delicada"
+      ],
+      "efeitos": [
+        {
+          "tipo": "bonus_defesa_item",
+          "bonus": 1
+        },
+        {
+          "tipo": "aumentar_penalidade_armadura_item",
+          "valor": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos"
+      ]
+    },
+    {
+      "id": "selada",
+      "nome": "Selada",
+      "categoriasIds": [
+        "armadura"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 nos testes de resistência.",
+      "restricoes": [
+        {
+          "tipo": "categoria_armadura",
+          "categoriaId": "pesada"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "bonus_resistencia",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras"
+      ]
+    },
+    {
+      "id": "canalizador",
+      "nome": "Canalizador",
+      "categoriasIds": [
+        "esoterico"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 no limite de PM.",
+      "efeitos": [
+        {
+          "tipo": "bonus_limite_pm_magia",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "esotericos"
+      ]
+    },
+    {
+      "id": "energetico",
+      "nome": "Energético",
+      "categoriasIds": [
+        "esoterico"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1d6 no dano de magias.",
+      "efeitos": [
+        {
+          "tipo": "bonus_dano_magia",
+          "dado": "1d6"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "esotericos"
+      ]
+    },
+    {
+      "id": "harmonizado",
+      "nome": "Harmonizado",
+      "categoriasIds": [
+        "esoterico"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "Custo de uma magia escolhida diminui em -1 PM.",
+      "escolhas": [
+        {
+          "id": "magia",
+          "tipo": "magia",
+          "quantidade": 1
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "reducao_custo_magia_escolhida",
+          "reducao": 1,
+          "escolha": "magia"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "esotericos"
+      ]
+    },
+    {
+      "id": "poderoso",
+      "nome": "Poderoso",
+      "categoriasIds": [
+        "esoterico"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 na CD de suas magias.",
+      "efeitos": [
+        {
+          "tipo": "bonus_cd_magias",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "esotericos"
+      ]
+    },
+    {
+      "id": "vigilante",
+      "nome": "Vigilante",
+      "categoriasIds": [
+        "esoterico"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+2 na Defesa.",
+      "efeitos": [
+        {
+          "tipo": "bonus_defesa",
+          "bonus": 2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "esotericos"
+      ]
+    },
+    {
+      "id": "aprimorado",
+      "nome": "Aprimorado",
+      "categoriasIds": [
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+1 em testes da perícia modificada pelo item.",
+      "efeitos": [
+        {
+          "tipo": "bonus_pericia_do_item",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "ferramentas_e_vestuario"
+      ]
+    },
+    {
+      "id": "banhado_a_ouro",
+      "nome": "Banhado a Ouro",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+2 em Diplomacia.",
+      "efeitos": [
+        {
+          "tipo": "bonus_pericia",
+          "periciaId": "diplomacia",
+          "bonus": 2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    },
+    {
+      "id": "cravejado_de_gemas",
+      "nome": "Cravejado de Gemas",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+2 em Enganação.",
+      "efeitos": [
+        {
+          "tipo": "bonus_pericia",
+          "periciaId": "enganacao",
+          "bonus": 2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    },
+    {
+      "id": "discreto",
+      "nome": "Discreto",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "-1 espaço e +5 para ocultar.",
+      "efeitos": [
+        {
+          "tipo": "reduzir_espacos_item",
+          "valor": 1,
+          "minimo": 1
+        },
+        {
+          "tipo": "bonus_pericia_condicional",
+          "periciaId": "ladinagem",
+          "bonus": 5,
+          "condicoes": [
+            "ocultar_item"
+          ]
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    },
+    {
+      "id": "macabro",
+      "nome": "Macabro",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "resumo": "+2 em Intimidação e -2 em Diplomacia.",
+      "efeitos": [
+        {
+          "tipo": "bonus_pericia",
+          "periciaId": "intimidacao",
+          "bonus": 2
+        },
+        {
+          "tipo": "penalidade_pericia",
+          "periciaId": "diplomacia",
+          "penalidade": -2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    },
+    {
+      "id": "farpada",
+      "nome": "Farpada",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Acertos críticos provocam sangramento.",
+      "preRequisitos": [
+        {
+          "tipo": "melhoria",
+          "melhoriaId": "cruel"
+        }
+      ],
+      "restricoes": [
+        {
+          "tipo": "tipo_dano",
+          "tipoDanoIds": [
+            "corte",
+            "perfuracao"
+          ]
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "condicao_em_critico",
+          "condicaoId": "sangrando"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "fosforo",
+      "nome": "Fósforo",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Munição ofusca o alvo, mas diminui o dano em um passo.",
+      "restricoes": [
+        {
+          "tipo": "municao"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "condicao_ao_acertar",
+          "condicaoId": "ofuscado",
+          "duracao": "1_rodada"
+        },
+        {
+          "tipo": "alterar_passo_dano",
+          "passos": -1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "guarda",
+      "nome": "Guarda",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "+1 na Defesa e em testes contra manobras.",
+      "efeitos": [
+        {
+          "tipo": "bonus_defesa",
+          "bonus": 1
+        },
+        {
+          "tipo": "bonus_resistir_manobra",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "incendiaria",
+      "nome": "Incendiária",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Munição causa dano de fogo e pode deixar em chamas.",
+      "restricoes": [
+        {
+          "tipo": "municao"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "dano_extra",
+          "valor": 1,
+          "tipoDanoId": "fogo"
+        },
+        {
+          "tipo": "condicao_ao_acertar",
+          "condicaoId": "em_chamas"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "pressurizada",
+      "nome": "Pressurizada",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "+2 em ataque e dano ao acionar mecanismo.",
+      "efeitos": [
+        {
+          "tipo": "bonus_ataque_arma_condicional",
+          "bonus": 2,
+          "condicao": "acionar_mecanismo"
+        },
+        {
+          "tipo": "bonus_dano_arma_condicional",
+          "bonus": 2,
+          "condicao": "acionar_mecanismo"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "balistico",
+      "nome": "Balístico",
+      "categoriasIds": [
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Ataques com escudo podem gastar uma bala para causar +2d6 de dano.",
+      "preRequisitos": [
+        {
+          "tipo": "melhoria",
+          "melhoriaId": "reforcada"
+        }
+      ],
+      "capacidade": {
+        "tipo": "bala",
+        "quantidade": 2
+      },
+      "efeitos": [
+        {
+          "tipo": "bonus_dano_escudo_condicional",
+          "dado": "2d6",
+          "custo": {
+            "itemCategoriaId": "municao",
+            "itemId": "balas",
+            "quantidade": 1
+          }
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "escudos"
+      ]
+    },
+    {
+      "id": "injetora",
+      "nome": "Injetora",
+      "categoriasIds": [
+        "armadura",
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Usa um efeito de preparado ou poção armazenado.",
+      "capacidade": {
+        "tipo": "preparado_ou_pocao",
+        "quantidade": 1
+      },
+      "efeitos": [
+        {
+          "tipo": "item_armazena_cargas",
+          "cargaTipo": "preparado_ou_pocao",
+          "capacidade": 1,
+          "recarga": {
+            "acao": "completa",
+            "consomeItem": true
+          }
+        },
+        {
+          "tipo": "ativar_item_armazenado",
+          "itemTipo": "preparado_ou_pocao",
+          "consomeCarga": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos"
+      ]
+    },
+    {
+      "id": "prudente",
+      "nome": "Prudente",
+      "categoriasIds": [
+        "armadura",
+        "escudo"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Atenua uma falha crítica.",
+      "efeitos": [
+        {
+          "tipo": "atenuar_falha_critica"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos"
+      ]
+    },
+    {
+      "id": "potencializador",
+      "nome": "Potencializador",
+      "categoriasIds": [
+        "esoterico"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "+2 no limite de PM.",
+      "efeitos": [
+        {
+          "tipo": "bonus_limite_pm_magia",
+          "bonus": 2
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "esotericos"
+      ]
+    },
+    {
+      "id": "brasonado",
+      "nome": "Brasonado",
+      "categoriasIds": [
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Permite usar a perícia do item para mudar atitude.",
+      "efeitos": [
+        {
+          "tipo": "substituir_pericia_condicional",
+          "acao": "mudar_atitude",
+          "periciaOrigem": "pericia_do_item",
+          "periciaAlvo": "diplomacia"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "ferramentas_e_vestuario"
+      ]
+    },
+    {
+      "id": "usado",
+      "nome": "Usado",
+      "categoriasIds": [
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "Pode rolar novamente 1 natural.",
+      "efeitos": [
+        {
+          "tipo": "rolar_novamente_resultado_natural",
+          "resultado": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "ferramentas_e_vestuario"
+      ]
+    },
+    {
+      "id": "deslumbrante",
+      "nome": "Deslumbrante",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "herois_de_arton"
+      ],
+      "resumo": "+1 na CD de habilidades baseadas em Carisma.",
+      "preRequisitos": [
+        {
+          "tipo": "uma_das_melhorias",
+          "melhoriasIds": [
+            "banhado_a_ouro",
+            "cravejado_de_gemas"
+          ]
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "bonus_cd_habilidade_por_atributo",
+          "atributoId": "car",
+          "bonus": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    },
+    {
+      "id": "multifuncional",
+      "nome": "Multifuncional",
+      "categoriasIds": [
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "resumo": "Item que modifica uma perícia passa a funcionar também para outra perícia do mesmo atributo-chave.",
+      "restricoes": [
+        {
+          "tipo": "item_modifica_pericia"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "adicionar_pericia_item_mesmo_atributo",
+          "quantidade": 1,
+          "excetoAtaque": true
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "ferramentas_e_vestuario"
+      ]
+    },
+    {
+      "id": "penetrante",
+      "nome": "Penetrante",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "resumo": "A arma ignora 5 pontos da redução de dano.",
+      "preRequisitos": [
+        {
+          "tipo": "melhoria",
+          "melhoriaId": "cruel"
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "ignorar_reducao_dano",
+          "valor": 5
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "conduite",
+      "nome": "Conduíte",
+      "categoriasIds": [
+        "arma"
+      ],
+      "livrosOrigemIds": [
+        "deuses_de_arton"
+      ],
+      "resumo": "Reduz em -1 PM o custo de Abençoar Arma.",
+      "efeitos": [
+        {
+          "tipo": "reducao_custo_habilidade",
+          "habilidadeId": "abencoar_arma",
+          "reducao": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armas"
+      ]
+    },
+    {
+      "id": "diligente",
+      "nome": "Diligente",
+      "categoriasIds": [
+        "armadura",
+        "escudo",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "deuses_de_arton"
+      ],
+      "resumo": "Reduz em -1 PM o custo de Prece de Combate.",
+      "efeitos": [
+        {
+          "tipo": "reducao_custo_habilidade",
+          "habilidadeId": "prece_de_combate",
+          "reducao": 1
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos",
+        "ferramentas_e_vestuario"
+      ]
+    },
+    {
+      "id": "inscrito",
+      "nome": "Inscrito",
+      "categoriasIds": [
+        "armadura",
+        "escudo",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "deuses_de_arton"
+      ],
+      "resumo": "Conta como símbolo sagrado.",
+      "efeitos": [
+        {
+          "tipo": "conta_como_item",
+          "itemId": "simbolo_sagrado"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "armaduras_e_escudos",
+        "ferramentas_e_vestuario"
+      ]
+    },
+    {
+      "id": "canonico",
+      "nome": "Canônico",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "deuses_de_arton"
+      ],
+      "resumo": "+1 na CD para resistir a habilidades mágicas divinas.",
+      "efeitos": [
+        {
+          "tipo": "bonus_cd_habilidades",
+          "bonus": 1,
+          "filtros": {
+            "origem": "divina",
+            "tipo": "magica"
+          }
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    },
+    {
+      "id": "devotado",
+      "nome": "Devotado",
+      "categoriasIds": [
+        "arma",
+        "armadura",
+        "escudo",
+        "esoterico",
+        "ferramenta",
+        "vestuario"
+      ],
+      "livrosOrigemIds": [
+        "deuses_de_arton"
+      ],
+      "resumo": "Reduz em -1 PM o custo de um poder concedido escolhido.",
+      "escolhas": [
+        {
+          "id": "poder_concedido",
+          "tipo": "poder_concedido",
+          "quantidade": 1
+        }
+      ],
+      "efeitos": [
+        {
+          "tipo": "reducao_custo_poder_concedido_escolhido",
+          "reducao": 1,
+          "escolha": "poder_concedido"
+        }
+      ],
+      "grupoAplicacaoIds": [
+        "qualquer_categoria_acima"
+      ]
+    }
+  ],
+  "materiaisEspeciais": [
+    {
+      "id": "aco_rubi",
+      "nome": "Aço-Rubi",
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "custosReferenciaId": "aco_rubi",
+      "aplicacoes": {}
+    },
+    {
+      "id": "adamante",
+      "nome": "Adamante",
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "custosReferenciaId": "adamante",
+      "aplicacoes": {}
+    },
+    {
+      "id": "gelo_eterno",
+      "nome": "Gelo Eterno",
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "custosReferenciaId": "gelo_eterno",
+      "aplicacoes": {}
+    },
+    {
+      "id": "madeira_tollon",
+      "nome": "Madeira Tollon",
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "custosReferenciaId": "madeira_tollon",
+      "aplicacoes": {}
+    },
+    {
+      "id": "materia_vermelha",
+      "nome": "Matéria Vermelha",
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "custosReferenciaId": "materia_vermelha",
+      "aplicacoes": {}
+    },
+    {
+      "id": "mitral",
+      "nome": "Mitral",
+      "livrosOrigemIds": [
+        "basico"
+      ],
+      "custosReferenciaId": "mitral",
+      "aplicacoes": {}
+    },
+    {
+      "id": "casco_de_monstro",
+      "nome": "Casco de Monstro",
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "desvantagens": [
+        {
+          "tipo": "dano_extra_objeto_por_dado",
+          "tipoDanoId": "impacto",
+          "valor": 1
+        }
+      ],
+      "aplicacoes": {
+        "arma": {
+          "resumo": "Conta como arma primitiva para Armamento da Natureza e efeitos semelhantes.",
+          "efeitos": [
+            {
+              "tipo": "conta_como_arma_primitiva"
+            }
+          ]
+        },
+        "armadura": {
+          "resumo": "Diminui a penalidade de armadura em 1. Armaduras pesadas permitem aplicar 1 ponto de Destreza na Defesa.",
+          "efeitos": [
+            {
+              "tipo": "reduzir_penalidade_armadura_item",
+              "valor": 1
+            },
+            {
+              "tipo": "limite_atributo_defesa_armadura_condicional",
+              "atributoId": "des",
+              "limite": 1,
+              "categoriaId": "pesada"
+            }
+          ]
+        },
+        "escudo": {
+          "resumo": "Diminui a penalidade de armadura em 1.",
+          "efeitos": [
+            {
+              "tipo": "reduzir_penalidade_armadura_item",
+              "valor": 1
+            }
+          ]
+        },
+        "esoterico": {
+          "resumo": "Ao lançar uma magia, recebe RD 5 contra o próximo dano até sua próxima rodada.",
+          "efeitos": [
+            {
+              "tipo": "reducao_dano_condicional",
+              "valor": 5,
+              "gatilho": "lancar_magia",
+              "duracao": "proximo_dano_ate_proxima_rodada"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "couraca_de_kaiju",
+      "nome": "Couraça de Kaiju",
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "aplicacoes": {
+        "arma": {
+          "resumo": "Dano aumenta um passo e pode gastar 2 PM para ignorar efeitos que reduzem dano do ataque, exceto RD.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "aumentar_passo_dano_arma",
+              "passos": 1
+            },
+            {
+              "tipo": "ignorar_efeito_reducao_dano_ataque",
+              "custoPM": 2,
+              "exceto": [
+                "reducao_dano"
+              ]
+            }
+          ]
+        },
+        "armadura_leve": {
+          "resumo": "RD 10/mágico.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "reducao_dano",
+              "valor": 10,
+              "exceto": "magico"
+            }
+          ]
+        },
+        "armadura_pesada": {
+          "resumo": "RD 20/mágico.",
+          "pecas": 3,
+          "efeitos": [
+            {
+              "tipo": "reducao_dano",
+              "valor": 20,
+              "exceto": "magico"
+            }
+          ]
+        },
+        "escudo": {
+          "resumo": "RD 10/mágico.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "reducao_dano",
+              "valor": 10,
+              "exceto": "magico"
+            }
+          ]
+        },
+        "esoterico": {
+          "resumo": "Em magia que causa dano, pode gastar 2 PM para ignorar efeitos que reduzem o dano, exceto RD e resistência bem-sucedida.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "ignorar_efeito_reducao_dano_magia",
+              "custoPM": 2,
+              "exceto": [
+                "reducao_dano",
+                "resistencia_bem_sucedida"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "couro_de_bulette",
+      "nome": "Couro de Bulette",
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "aplicacoes": {
+        "armadura_leve": {
+          "resumo": "Deslocamento de escavação igual à metade do deslocamento normal e redução de ácido 5.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "deslocamento_especial",
+              "modo": "escavacao",
+              "valor": "metade_deslocamento_normal"
+            },
+            {
+              "tipo": "reducao_dano_tipo",
+              "tipoDanoId": "acido",
+              "valor": 5
+            }
+          ]
+        },
+        "armadura_pesada": {
+          "resumo": "Deslocamento de escavação igual à metade do deslocamento normal e redução de ácido 10.",
+          "pecas": 3,
+          "efeitos": [
+            {
+              "tipo": "deslocamento_especial",
+              "modo": "escavacao",
+              "valor": "metade_deslocamento_normal"
+            },
+            {
+              "tipo": "reducao_dano_tipo",
+              "tipoDanoId": "acido",
+              "valor": 10
+            }
+          ]
+        },
+        "esoterico": {
+          "resumo": "Ao lançar magia de ácido que causa dano, pode rolar novamente resultados 1 no dano.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "rolar_novamente_dano_magia",
+              "resultado": 1,
+              "tipoDanoId": "acido"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cristal_de_sol",
+      "nome": "Cristal de Sol",
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "aplicacoes": {
+        "arma": {
+          "resumo": "Só para armas de corte ou perfuração. Causa +2 dano de fogo.",
+          "pecas": 1,
+          "restricoes": [
+            {
+              "tipo": "tipo_dano",
+              "tipoDanoIds": [
+                "corte",
+                "perfuracao"
+              ]
+            }
+          ],
+          "efeitos": [
+            {
+              "tipo": "bonus_dano_arma",
+              "bonus": 2,
+              "tipoDanoId": "fogo"
+            }
+          ]
+        },
+        "armadura": {
+          "resumo": "Em resistência contra frio, rola dois dados e usa o melhor.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "rolar_dois_dados_resistencia",
+              "tipoDanoId": "frio"
+            }
+          ]
+        },
+        "escudo": {
+          "resumo": "Em resistência contra frio, rola dois dados e usa o melhor.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "rolar_dois_dados_resistencia",
+              "tipoDanoId": "frio"
+            }
+          ]
+        },
+        "esoterico": {
+          "resumo": "Ao lançar magia de fogo, pode gastar 1 PM para deixar em chamas quem falhar no teste.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "condicao_em_falha_resistencia_magia",
+              "custoPM": 1,
+              "tipoDanoId": "fogo",
+              "condicaoId": "em_chamas"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lanajuste",
+      "nome": "Lanajuste",
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "aplicacoes": {
+        "arma": {
+          "resumo": "Ignora penalidades por combate submerso e pode ser usada por devotos do Oceano sem violar restrições.",
+          "efeitos": [
+            {
+              "tipo": "ignorar_penalidade",
+              "penalidadeId": "combate_submerso"
+            },
+            {
+              "tipo": "permitido_para_devoto",
+              "deusId": "oceano"
+            }
+          ]
+        },
+        "armadura_leve": {
+          "resumo": "Redução de corte 5.",
+          "efeitos": [
+            {
+              "tipo": "reducao_dano_tipo",
+              "tipoDanoId": "corte",
+              "valor": 5
+            }
+          ]
+        },
+        "armadura_pesada": {
+          "resumo": "Redução de corte 10.",
+          "efeitos": [
+            {
+              "tipo": "reducao_dano_tipo",
+              "tipoDanoId": "corte",
+              "valor": 10
+            }
+          ]
+        },
+        "escudo": {
+          "resumo": "Redução de corte 5.",
+          "efeitos": [
+            {
+              "tipo": "reducao_dano_tipo",
+              "tipoDanoId": "corte",
+              "valor": 5
+            }
+          ]
+        },
+        "esoterico": {
+          "resumo": "Ao lançar magia que causa dano de corte, pode rolar novamente resultados 1 no dano.",
+          "efeitos": [
+            {
+              "tipo": "rolar_novamente_dano_magia",
+              "resultado": 1,
+              "tipoDanoId": "corte"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pena_de_kraken",
+      "nome": "Pena de Kraken",
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "aplicacoes": {
+        "arma": {
+          "resumo": "Em acerto crítico, o dano aumenta dois passos antes de multiplicar.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "aumentar_passo_dano_em_critico",
+              "passos": 2
+            }
+          ]
+        },
+        "armadura_leve": {
+          "resumo": "Quando criatura erra ataque corpo a corpo contra você, ela perde 5 PV.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "perda_pv_ao_errar_ataque_corpo_a_corpo_contra_usuario",
+              "valor": 5
+            }
+          ]
+        },
+        "armadura_pesada": {
+          "resumo": "Quando criatura erra ataque corpo a corpo contra você, ela perde 10 PV.",
+          "pecas": 3,
+          "efeitos": [
+            {
+              "tipo": "perda_pv_ao_errar_ataque_corpo_a_corpo_contra_usuario",
+              "valor": 10
+            }
+          ]
+        },
+        "escudo": {
+          "resumo": "Quando criatura erra ataque corpo a corpo contra você, ela perde 5 PV.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "perda_pv_ao_errar_ataque_corpo_a_corpo_contra_usuario",
+              "valor": 5
+            }
+          ]
+        },
+        "esoterico": {
+          "resumo": "Se o item fornece bônus numérico, esse bônus aumenta em +1.",
+          "pecas": 1,
+          "efeitos": [
+            {
+              "tipo": "aumentar_bonus_numerico_item",
+              "bonus": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "prata",
+      "nome": "Prata",
+      "livrosOrigemIds": [
+        "ameacas_de_arton"
+      ],
+      "podeCombinarComOutroMaterial": true,
+      "aplicacoes": {
+        "arma": {
+          "resumo": "+2 dano contra espíritos e mortos-vivos e conta como mágica contra essas criaturas.",
+          "efeitos": [
+            {
+              "tipo": "bonus_dano_vs_tipo_criatura",
+              "bonus": 2,
+              "criaturasIds": [
+                "espirito",
+                "morto_vivo"
+              ]
+            },
+            {
+              "tipo": "conta_como_magica_vs_tipo_criatura",
+              "criaturasIds": [
+                "espirito",
+                "morto_vivo"
+              ]
+            }
+          ]
+        },
+        "armadura_leve": {
+          "resumo": "RD 5 contra dano causado por espíritos e mortos-vivos.",
+          "efeitos": [
+            {
+              "tipo": "reducao_dano_vs_tipo_criatura",
+              "valor": 5,
+              "criaturasIds": [
+                "espirito",
+                "morto_vivo"
+              ]
+            }
+          ]
+        },
+        "armadura_pesada": {
+          "resumo": "RD 10 contra dano causado por espíritos e mortos-vivos.",
+          "efeitos": [
+            {
+              "tipo": "reducao_dano_vs_tipo_criatura",
+              "valor": 10,
+              "criaturasIds": [
+                "espirito",
+                "morto_vivo"
+              ]
+            }
+          ]
+        },
+        "escudo": {
+          "resumo": "RD 5 contra dano causado por espíritos e mortos-vivos.",
+          "efeitos": [
+            {
+              "tipo": "reducao_dano_vs_tipo_criatura",
+              "valor": 5,
+              "criaturasIds": [
+                "espirito",
+                "morto_vivo"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "custosMateriaisBasicos": [
+    {
+      "materialEspecialId": "aco_rubi",
+      "custos": {
+        "arma": 6000,
+        "armadura_leve": 3000,
+        "armadura_pesada": 6000,
+        "escudo": 3000,
+        "esoterico": 6000
+      }
+    },
+    {
+      "materialEspecialId": "adamante",
+      "custos": {
+        "arma": 3000,
+        "armadura_leve": 6000,
+        "armadura_pesada": 18000,
+        "escudo": 6000,
+        "esoterico": 3000
+      }
+    },
+    {
+      "materialEspecialId": "gelo_eterno",
+      "custos": {
+        "arma": 600,
+        "armadura_leve": 1500,
+        "armadura_pesada": 3000,
+        "escudo": 1500,
+        "esoterico": 3000
+      }
+    },
+    {
+      "materialEspecialId": "madeira_tollon",
+      "custos": {
+        "arma": 1500,
+        "escudo": 1500,
+        "esoterico": 1500
+      }
+    },
+    {
+      "materialEspecialId": "materia_vermelha",
+      "custos": {
+        "arma": 1500,
+        "armadura_leve": 6000,
+        "armadura_pesada": 18000,
+        "escudo": 6000,
+        "esoterico": 3000
+      }
+    },
+    {
+      "materialEspecialId": "mitral",
+      "custos": {
+        "arma": 1500,
+        "armadura_leve": 1500,
+        "armadura_pesada": 12000,
+        "escudo": 1500,
+        "esoterico": 3000
+      }
+    }
+  ]
+}
