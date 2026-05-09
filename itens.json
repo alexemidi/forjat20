@@ -8588,82 +8588,82 @@
       "variantes": [
         {
           "id": "alquimista",
-          "nome": "Instrumentos de Of?cio (alquimista)",
+          "nome": "Instrumentos de Ofício (alquimista)",
           "oficioId": "alquimista"
         },
         {
           "id": "armeiro",
-          "nome": "Instrumentos de Of?cio (armeiro)",
+          "nome": "Instrumentos de Ofício (armeiro)",
           "oficioId": "armeiro"
         },
         {
           "id": "artesao",
-          "nome": "Instrumentos de Of?cio (artes?o)",
+          "nome": "Instrumentos de Ofício (artesão)",
           "oficioId": "artesao"
         },
         {
           "id": "cozinheiro",
-          "nome": "Instrumentos de Of?cio (cozinheiro)",
+          "nome": "Instrumentos de Ofício (cozinheiro)",
           "oficioId": "cozinheiro"
         },
         {
           "id": "engenhoqueiro",
-          "nome": "Instrumentos de Of?cio (engenhoqueiro)",
+          "nome": "Instrumentos de Ofício (engenhoqueiro)",
           "oficioId": "engenhoqueiro"
         },
         {
           "id": "escriba",
-          "nome": "Instrumentos de Of?cio (escriba)",
+          "nome": "Instrumentos de Ofício (escriba)",
           "oficioId": "escriba"
         },
         {
           "id": "fazendeiro",
-          "nome": "Instrumentos de Of?cio (fazendeiro)",
+          "nome": "Instrumentos de Ofício (fazendeiro)",
           "oficioId": "fazendeiro"
         },
         {
           "id": "pescador",
-          "nome": "Instrumentos de Of?cio (pescador)",
+          "nome": "Instrumentos de Ofício (pescador)",
           "oficioId": "pescador"
         },
         {
           "id": "mercador",
-          "nome": "Instrumentos de Of?cio (mercador)",
+          "nome": "Instrumentos de Ofício (mercador)",
           "oficioId": "mercador"
         },
         {
           "id": "minerador",
-          "nome": "Instrumentos de Of?cio (minerador)",
+          "nome": "Instrumentos de Ofício (minerador)",
           "oficioId": "minerador"
         },
         {
           "id": "alvenaria",
-          "nome": "Instrumentos de Of?cio (alvenaria)",
+          "nome": "Instrumentos de Ofício (alvenaria)",
           "oficioId": "alvenaria"
         },
         {
           "id": "carpinteiro",
-          "nome": "Instrumentos de Of?cio (carpinteiro)",
+          "nome": "Instrumentos de Ofício (carpinteiro)",
           "oficioId": "carpinteiro"
         },
         {
           "id": "joalheiro",
-          "nome": "Instrumentos de Of?cio (joalheiro)",
+          "nome": "Instrumentos de Ofício (joalheiro)",
           "oficioId": "joalheiro"
         },
         {
           "id": "estalajadeiro",
-          "nome": "Instrumentos de Of?cio (estalajadeiro)",
+          "nome": "Instrumentos de Ofício (estalajadeiro)",
           "oficioId": "estalajadeiro"
         },
         {
           "id": "escultor",
-          "nome": "Instrumentos de Of?cio (escultor)",
+          "nome": "Instrumentos de Ofício (escultor)",
           "oficioId": "escultor"
         },
         {
           "id": "pintor",
-          "nome": "Instrumentos de Of?cio (pintor)",
+          "nome": "Instrumentos de Ofício (pintor)",
           "oficioId": "pintor"
         }
       ]

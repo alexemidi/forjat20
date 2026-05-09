@@ -568,7 +568,6 @@ function expandCraftableItemVariants(items = []) {
 function canOficiosFabricateItem(item, selectedOficios = []) {
   if (!selectedOficios.length) return false;
   const allowedKeys = getAllowedCraftKeysForOficios(selectedOficios);
-  if (item.oficioId) return allowedKeys.has(`oficio:${item.oficioId}`);
   return getCraftKeysForItem(item).some((key) => allowedKeys.has(key));
 }
 
@@ -621,7 +620,14 @@ function resolveCraftedCatalogItem(catalog, selectedValue) {
   if (exact) return exact;
 
   const variants = items.filter((option) => option.itemBaseId === selectedValue);
-  return variants.length === 1 ? variants[0] : null;
+  if (variants.length === 1) return variants[0];
+  if (variants.length > 1) {
+    return {
+      id: selectedValue,
+      nome: "Instrumentos de Of\u00edcio (escolha o of\u00edcio)"
+    };
+  }
+  return null;
 }
 
 function getItemPriceValue(item) {
