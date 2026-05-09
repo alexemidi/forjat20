@@ -56,7 +56,8 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
         modo: "",
         itemSuperior: {
           itemId: "",
-          melhoriaId: ""
+          melhoriaId: "",
+          melhoriaIds: []
         },
         alquimicos: []
       }
@@ -463,24 +464,37 @@ function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
   const [openImprovementShop, setOpenImprovementShop] = useState(false);
   const choice = classChoices.prototipo ?? {};
   const selectedSuperior = choice.itemSuperior ?? {};
-  const shopItems = getPrototypeShopItems(catalogs.items);
+  const shopItems = getSuperiorPrototypeOptions(catalogs).map((option) => option.item);
   const selectedItem = shopItems.find((item) => item.id === selectedSuperior.itemId);
   const improvementOptions = selectedItem ? getCompatiblePrototypeImprovements(selectedItem, catalogs.improvements) : [];
-  const selectedImprovement = improvementOptions.find((improvement) => improvement.id === selectedSuperior.melhoriaId);
+  const selectedImprovementIds = getPrototypeImprovementIds(selectedSuperior)
+    .filter((id) => improvementOptions.some((improvement) => improvement.id === id));
+  const selectedImprovements = selectedImprovementIds
+    .map((id) => improvementOptions.find((improvement) => improvement.id === id))
+    .filter(Boolean);
+  const selectedImprovementLabel = formatPrototypeImprovementsSummary(selectedImprovements);
+  const selectedImprovementCount = selectedImprovementIds.length;
 
   function setSuperiorItem(itemId) {
     updateDraft("escolhas.classe.prototipo", {
       modo: "item_superior",
-      itemSuperior: { itemId, melhoriaId: "" },
+      itemSuperior: { itemId, melhoriaId: "", melhoriaIds: [] },
       alquimicos: []
     });
     setOpenSuperiorShop(false);
     setOpenImprovementShop(false);
   }
 
-  function setSuperiorImprovement(melhoriaId) {
-    updateDraft("escolhas.classe.prototipo.itemSuperior.melhoriaId", melhoriaId);
-    setOpenImprovementShop(false);
+  function toggleSuperiorImprovement(melhoriaId) {
+    const nextIds = selectedImprovementIds.includes(melhoriaId)
+      ? selectedImprovementIds.filter((id) => id !== melhoriaId)
+      : [...selectedImprovementIds, melhoriaId];
+    updateDraft("escolhas.classe.prototipo.itemSuperior", {
+      ...selectedSuperior,
+      itemId: selectedSuperior.itemId ?? "",
+      melhoriaId: nextIds[0] ?? "",
+      melhoriaIds: nextIds
+    });
   }
 
   return (
@@ -489,7 +503,12 @@ function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
         <div className={`origin-item-row class-prototype-row${openSuperiorShop || openImprovementShop ? " origin-item-row--active" : ""}`}>
           <div>
             <strong>{selectedItem?.nome ?? "Um item superior de até T$ 500"}</strong>
-            {selectedItem ? <span>{formatPrototypePrice(getItemPrice(selectedItem))}</span> : null}
+            {selectedItem ? (
+              <span>
+                {formatPrototypePrice(getPrototypeTotalPrice(selectedItem, selectedImprovementCount))}
+                {selectedImprovementLabel ? ` | ${selectedImprovementLabel}` : ""}
+              </span>
+            ) : null}
           </div>
           <>
             <button
@@ -520,14 +539,15 @@ function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
               }}
               type="button"
             >
-              {selectedImprovement ? selectedImprovement.nome : "Escolher melhoria"}
+              {selectedImprovementLabel || "Escolher melhoria"}
             </button>
             {openImprovementShop && selectedItem ? (
               <PrototypeImprovementShop
                 improvements={improvementOptions}
+                item={selectedItem}
                 onClose={() => setOpenImprovementShop(false)}
-                onSelect={setSuperiorImprovement}
-                selectedImprovementId={selectedSuperior.melhoriaId ?? ""}
+                onToggle={toggleSuperiorImprovement}
+                selectedImprovementIds={selectedImprovementIds}
               />
             ) : null}
           </>
@@ -549,7 +569,7 @@ function getSuperiorPrototypeOptions(catalogs) {
     }))
     .filter((option) => option.totalPrice <= PROTOTYPE_PRICE_LIMIT)
     .filter((option) => option.item.price <= PROTOTYPE_BASE_ITEM_LIMIT)
-    .filter((option) => getCompatiblePrototypeImprovements(option.item, catalogs.improvements).length)
+    .filter((option) => getAffordablePrototypeImprovements(option.item, catalogs.improvements).length)
     .sort((a, b) => a.item.nome.localeCompare(b.item.nome));
 }
 
@@ -566,8 +586,47 @@ function getCompatiblePrototypeImprovements(item, improvements) {
   return (improvements ?? [])
     .filter((improvement) => improvement.categoriasIds?.includes(category))
     .filter((improvement) => improvement.id !== "material_especial")
-    .filter((improvement) => !(improvement.preRequisitos ?? []).some((req) => req.tipo === "melhoria"))
     .sort((a, b) => a.nome.localeCompare(b.nome));
+}
+
+function getAffordablePrototypeImprovements(item, improvements) {
+  return getCompatiblePrototypeImprovements(item, improvements)
+    .filter((improvement) => !(improvement.preRequisitos ?? []).length)
+    .filter(() => getPrototypeTotalPrice(item, 1) <= PROTOTYPE_PRICE_LIMIT);
+}
+
+function getPrototypeImprovementIds(itemSuperior) {
+  if (Array.isArray(itemSuperior?.melhoriaIds)) return itemSuperior.melhoriaIds.filter(Boolean);
+  return itemSuperior?.melhoriaId ? [itemSuperior.melhoriaId] : [];
+}
+
+function getPrototypeTotalPrice(item, improvementCount) {
+  if (!improvementCount) return getItemPrice(item);
+  return getItemPrice(item) + (IMPROVEMENT_PRICE_BY_COUNT[improvementCount] ?? Number.POSITIVE_INFINITY);
+}
+
+function formatPrototypeImprovementsSummary(improvements) {
+  if (!improvements.length) return "";
+  return improvements.map((improvement) => improvement.nome).join(", ");
+}
+
+function getImprovementBlockedReason(improvement, selectedIds, item) {
+  const isSelected = selectedIds.includes(improvement.id);
+  if (isSelected) return "";
+
+  const nextCount = selectedIds.length + 1;
+  if (!IMPROVEMENT_PRICE_BY_COUNT[nextCount]) return "Limite de 4 melhorias";
+
+  const missingPrereq = (improvement.preRequisitos ?? []).find((req) => {
+    if (req.tipo === "melhoria") return !selectedIds.includes(req.melhoriaId);
+    if (req.tipo === "uma_das_melhorias") return !(req.melhoriasIds ?? []).some((id) => selectedIds.includes(id));
+    return false;
+  });
+  if (missingPrereq) return "Pré-requisito não atendido";
+
+  if (getPrototypeTotalPrice(item, nextCount) > PROTOTYPE_PRICE_LIMIT) return `Passa de T$ ${PROTOTYPE_PRICE_LIMIT}`;
+
+  return "";
 }
 
 function getSuperiorItemCategory(item) {
@@ -661,13 +720,15 @@ function PrototypeSuperiorItemShop({ items, selectedItemId, onClose, onSelect })
   );
 }
 
-function PrototypeImprovementShop({ improvements, selectedImprovementId, onClose, onSelect }) {
+function PrototypeImprovementShop({ improvements, item, selectedImprovementIds, onClose, onToggle }) {
+  const selectedCount = selectedImprovementIds.length;
+  const totalPrice = getPrototypeTotalPrice(item, selectedCount);
   return (
     <div className="origin-item-dialog class-prototype-shop" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="false" aria-label="Escolher melhoria">
       <div className="origin-item-dialog__header">
         <div>
           <strong>Escolher melhoria</strong>
-          <span>Uma melhoria</span>
+          <span>{selectedCount ? `${selectedCount} melhoria(s) | ${formatPrototypePrice(totalPrice)}` : "Escolha uma melhoria"}</span>
         </div>
         <button className="icon-button" onClick={onClose} type="button">
           ×
@@ -677,20 +738,27 @@ function PrototypeImprovementShop({ improvements, selectedImprovementId, onClose
         <div className="origin-item-table__head">
           <span>Melhoria</span>
           <span>Benefício</span>
+          <span>Status</span>
         </div>
         <div className="origin-item-table__section">
           <strong>Disponíveis</strong>
-          {improvements.map((improvement) => (
-            <button
-              className={`origin-item-table__row${selectedImprovementId === improvement.id ? " origin-item-table__row--active" : ""}`}
-              key={improvement.id}
-              onClick={() => onSelect(improvement.id)}
-              type="button"
-            >
-              <span>{improvement.nome}</span>
-              <span>{improvement.resumo ?? "—"}</span>
-            </button>
-          ))}
+          {improvements.map((improvement) => {
+            const active = selectedImprovementIds.includes(improvement.id);
+            const blockedReason = getImprovementBlockedReason(improvement, selectedImprovementIds, item);
+            return (
+              <button
+                className={`origin-item-table__row${active ? " origin-item-table__row--active" : ""}`}
+                disabled={Boolean(blockedReason)}
+                key={improvement.id}
+                onClick={() => onToggle(improvement.id)}
+                type="button"
+              >
+                <span>{improvement.nome}</span>
+                <span>{improvement.resumo ?? "—"}</span>
+                <span>{active ? "Selecionada" : blockedReason || "Disponível"}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

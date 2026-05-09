@@ -429,7 +429,15 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
   });
 
   const prototipo = draft.escolhas?.classe?.prototipo ?? {};
-  if (prototipo.itemSuperior?.itemId) addItem(prototipo.itemSuperior.itemId);
+  if (prototipo.itemSuperior?.itemId) {
+    const selectedImprovementIds = getDebugPrototypeImprovementIds(prototipo.itemSuperior);
+    const improvementNames = selectedImprovementIds
+      .map((id) => catalogs.improvements.find((improvement) => improvement.id === id)?.nome)
+      .filter(Boolean);
+    const item = catalogs.items.find((catalogItem) => catalogItem.id === prototipo.itemSuperior.itemId);
+    const suffix = improvementNames.length ? ` (${improvementNames.join(", ")})` : "";
+    addItem(prototipo.itemSuperior.itemId, 1, item ? `${item.nome}${suffix}` : "");
+  }
   (prototipo.alquimicos ?? []).forEach((itemId) => addItem(itemId));
   (draft.escolhas?.equipamentoInicialIds ?? []).forEach((itemId) => addItem(itemId));
   (draft.inventario?.itens ?? []).forEach((item) => addItem(item.itemId, Number(item.quantidade ?? 1) || 1));
@@ -445,6 +453,11 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
 function isDebugOficioInstrumentChoice(itemText) {
   const normalized = normalizeDebugText(itemText);
   return normalized.includes("instrumentos de oficio") && normalized.includes("qualquer");
+}
+
+function getDebugPrototypeImprovementIds(itemSuperior) {
+  if (Array.isArray(itemSuperior?.melhoriaIds)) return itemSuperior.melhoriaIds.filter(Boolean);
+  return itemSuperior?.melhoriaId ? [itemSuperior.melhoriaId] : [];
 }
 
 function normalizeDebugText(value) {

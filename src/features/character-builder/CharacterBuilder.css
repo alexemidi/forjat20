@@ -1035,7 +1035,7 @@
 
 .origin-item-table--improvements .origin-item-table__head,
 .origin-item-table--improvements .origin-item-table__row {
-  grid-template-columns: minmax(160px, 0.75fr) minmax(220px, 1.25fr);
+  grid-template-columns: minmax(130px, 0.7fr) minmax(220px, 1.2fr) minmax(100px, 0.55fr);
 }
 
 .origin-item-table__head {

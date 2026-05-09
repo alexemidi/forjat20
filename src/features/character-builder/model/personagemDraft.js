@@ -47,7 +47,8 @@ export function criarPersonagemDraft() {
           modo: "",
           itemSuperior: {
             itemId: "",
-            melhoriaId: ""
+            melhoriaId: "",
+            melhoriaIds: []
           },
           alquimicos: []
         }
