@@ -62,6 +62,9 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
 
   function setOriginItem(slotId, itemId) {
     updateDraft(`escolhas.origem.itens.${slotId}`, itemId);
+    if (itemId !== "instrumentos_de_oficio") {
+      updateDraft(`escolhas.origem.itens.${slotId}:oficio`, "");
+    }
   }
 
   function setOriginOficio(benefit, oficioId) {
@@ -159,9 +162,7 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                   className={`origin-item-row${entry.kind === "instrumentos_oficio" || entry.kind === "crafted_item" ? " origin-item-row--interactive" : ""}`}
                   key={entry.id}
                   onClick={
-                    entry.kind === "instrumentos_oficio" && selectedCharacterOficios.length
-                      ? () => setOpenOriginItemOficio(openOriginItemOficio === entry.id ? null : entry.id)
-                      : entry.kind === "crafted_item"
+                    entry.kind === "crafted_item"
                         ? () => setOpenOriginCraftedItem(openOriginCraftedItem === entry.id ? null : entry.id)
                         : undefined
                   }
@@ -174,19 +175,58 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                     ) : null}
                   </div>
                   {entry.kind === "instrumentos_oficio" ? (
-                    openOriginItemOficio === entry.id ? (
-                      <OriginOficioPopover
-                        currentOficioId={selectedItems[entry.id] ?? ""}
-                        oficioOptions={selectedCharacterOficios.map((oficioId) => ({ id: oficioId, label: getOficioLabel(oficioId) }))}
-                        onClose={() => setOpenOriginItemOficio(null)}
-                        onSelect={(oficioId) => {
-                          setOriginItem(entry.id, oficioId);
-                          setOpenOriginItemOficio(null);
+                    <div className="origin-item-actions">
+                      <button
+                        className="origin-item-select-button"
+                        disabled={!selectedCharacterOficios.length}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setOpenOriginItemOficio(openOriginItemOficio === entry.id ? null : entry.id);
                         }}
-                      />
-                    ) : null
+                        type="button"
+                      >
+                        {selectedItems[entry.id] ? "Trocar instrumento de ofício" : "Escolher instrumento de ofício"}
+                      </button>
+                      {openOriginItemOficio === entry.id ? (
+                        <OriginOficioPopover
+                          currentOficioId={selectedItems[entry.id] ?? ""}
+                          oficioOptions={selectedCharacterOficios.map((oficioId) => ({ id: oficioId, label: getOficioLabel(oficioId) }))}
+                          onClose={() => setOpenOriginItemOficio(null)}
+                          onSelect={(oficioId) => {
+                            setOriginItem(entry.id, oficioId);
+                            setOpenOriginItemOficio(null);
+                          }}
+                        />
+                      ) : null}
+                    </div>
                   ) : entry.kind === "crafted_item" ? (
-                    <>
+                    <div className="origin-item-actions">
+                      {selectedItems[entry.id] === "instrumentos_de_oficio" ? (
+                        <>
+                          <button
+                            className="origin-item-select-button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setOpenOriginItemOficio(openOriginItemOficio === `${entry.id}:oficio` ? null : `${entry.id}:oficio`);
+                            }}
+                            type="button"
+                          >
+                            {selectedItems[`${entry.id}:oficio`]
+                              ? `Instrumento: ${getOficioLabel(selectedItems[`${entry.id}:oficio`]).toLowerCase()}`
+                              : "Escolher instrumento de ofício"}
+                          </button>
+                          {openOriginItemOficio === `${entry.id}:oficio` ? (
+                            <OriginOficioPopover
+                              currentOficioId={selectedItems[`${entry.id}:oficio`] ?? ""}
+                              onClose={() => setOpenOriginItemOficio(null)}
+                              onSelect={(oficioId) => {
+                                setOriginItem(`${entry.id}:oficio`, oficioId);
+                                setOpenOriginItemOficio(null);
+                              }}
+                            />
+                          ) : null}
+                        </>
+                      ) : null}
                       <button
                         className="origin-item-select-button"
                         onClick={(event) => {
@@ -208,7 +248,7 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                           }}
                         />
                       ) : null}
-                    </>
+                    </div>
                   ) : entry.options?.length ? (
                     <select onChange={(event) => setOriginItem(entry.id, event.target.value)} value={selectedItems[entry.id] ?? ""}>
                       <option value="">Escolha</option>
@@ -533,7 +573,7 @@ function getCraftedItemPriceLimit(itemText) {
 }
 
 function getCraftedItemCatalog(items, maxPrice, selectedOficios = []) {
-  const availableItems = expandCraftableItemVariants(items)
+  const availableItems = items
     .filter((item) => ["arma", "armadura", "escudo", "item_geral"].includes(item.tipo))
     .filter((item) => !maxPrice || getItemPriceValue(item) <= maxPrice)
     .filter((item) => canOficiosFabricateItem(item, selectedOficios))
@@ -549,20 +589,6 @@ function getCraftedItemCatalog(items, maxPrice, selectedOficios = []) {
     general: availableItems.filter((item) => item.tipo === "item_geral" && GENERAL_ITEM_ALLOWED_CATEGORIES.has(item.categoriaId)),
     guidance: getCraftGuidanceForOficios(selectedOficios)
   };
-}
-
-function expandCraftableItemVariants(items = []) {
-  return items.flatMap((item) => {
-    if (!Array.isArray(item.variantes) || !item.variantes.length) return [item];
-    return item.variantes.map((variant) => ({
-      ...item,
-      ...variant,
-      id: `${item.id}:${variant.id}`,
-      itemBaseId: item.id,
-      varianteId: variant.id,
-      nome: variant.oficioId ? `Instrumentos de Of\u00edcio (${getOficioLabel(variant.oficioId).toLowerCase()})` : variant.nome ?? item.nome
-    }));
-  });
 }
 
 function canOficiosFabricateItem(item, selectedOficios = []) {
@@ -582,8 +608,6 @@ function getAllowedCraftKeysForOficios(selectedOficios = []) {
 
 function getCraftKeysForItem(item) {
   const keys = [item.id ? `item:${item.id}` : ""];
-  if (item.itemBaseId) keys.push(`item:${item.itemBaseId}`);
-  if (item.oficioId) keys.push(`oficio:${item.oficioId}`);
   if (["arma", "armadura", "escudo"].includes(item.tipo)) keys.push(item.tipo);
   if (item.tipo === "item_geral") keys.push(item.categoriaId);
   return keys.filter(Boolean);
@@ -616,18 +640,7 @@ function getCraftedCatalogItems(catalog) {
 
 function resolveCraftedCatalogItem(catalog, selectedValue) {
   const items = getCraftedCatalogItems(catalog);
-  const exact = items.find((option) => option.id === selectedValue);
-  if (exact) return exact;
-
-  const variants = items.filter((option) => option.itemBaseId === selectedValue);
-  if (variants.length === 1) return variants[0];
-  if (variants.length > 1) {
-    return {
-      id: selectedValue,
-      nome: "Instrumentos de Of\u00edcio (escolha o of\u00edcio)"
-    };
-  }
-  return null;
+  return items.find((option) => option.id === selectedValue) ?? null;
 }
 
 function getItemPriceValue(item) {

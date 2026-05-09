@@ -856,6 +856,14 @@
   width: 100%;
 }
 
+.origin-item-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  min-width: 0;
+  position: relative;
+}
+
 .origin-item-select-button {
   background: #fffdfa;
   border: 1px solid #cfc4bd;
