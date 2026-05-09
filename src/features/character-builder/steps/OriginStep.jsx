@@ -39,6 +39,7 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
       .filter((pericia) => pericia.treinada && String(pericia.id).startsWith("oficio:"))
       .map((pericia) => String(pericia.id).slice("oficio:".length));
   }, [catalogs, draft]);
+  const defaultInstrumentOficioId = selectedCharacterOficios[0] ?? "";
 
   function setOrigin(originId) {
     updateDraft("info.origemId", originId);
@@ -168,7 +169,7 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                   }
                 >
                   <div>
-                    <strong>{formatOriginItemName(entry, selectedItems[entry.id])}</strong>
+                    <strong>{formatOriginItemName(entry, selectedItems[entry.id], selectedItems, defaultInstrumentOficioId)}</strong>
                     {entry.descricao ? <span>{entry.descricao}</span> : null}
                     {entry.kind === "instrumentos_oficio" && selectedCharacterOficios.length === 0 ? (
                       <span>Escolha uma perícia Ofício antes de definir os instrumentos.</span>
@@ -185,11 +186,11 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                         }}
                         type="button"
                       >
-                        {selectedItems[entry.id] ? "Trocar instrumento de ofício" : "Escolher instrumento de ofício"}
+                        {formatInstrumentOficioButtonLabel(selectedItems[entry.id] || defaultInstrumentOficioId)}
                       </button>
                       {openOriginItemOficio === entry.id ? (
                         <OriginOficioPopover
-                          currentOficioId={selectedItems[entry.id] ?? ""}
+                          currentOficioId={selectedItems[entry.id] || defaultInstrumentOficioId}
                           oficioOptions={selectedCharacterOficios.map((oficioId) => ({ id: oficioId, label: getOficioLabel(oficioId) }))}
                           onClose={() => setOpenOriginItemOficio(null)}
                           onSelect={(oficioId) => {
@@ -211,13 +212,11 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                             }}
                             type="button"
                           >
-                            {selectedItems[`${entry.id}:oficio`]
-                              ? `Instrumento: ${getOficioLabel(selectedItems[`${entry.id}:oficio`]).toLowerCase()}`
-                              : "Escolher instrumento de ofício"}
+                            {formatInstrumentOficioButtonLabel(selectedItems[`${entry.id}:oficio`] || defaultInstrumentOficioId)}
                           </button>
                           {openOriginItemOficio === `${entry.id}:oficio` ? (
                             <OriginOficioPopover
-                              currentOficioId={selectedItems[`${entry.id}:oficio`] ?? ""}
+                              currentOficioId={selectedItems[`${entry.id}:oficio`] || defaultInstrumentOficioId}
                               onClose={() => setOpenOriginItemOficio(null)}
                               onSelect={(oficioId) => {
                                 setOriginItem(`${entry.id}:oficio`, oficioId);
@@ -529,15 +528,24 @@ function isOficioInstrumentChoice(itemText) {
   return normalized.includes("instrumentos de oficio") && normalized.includes("qualquer");
 }
 
-function formatOriginItemName(entry, selectedValue) {
-  if (entry.kind === "instrumentos_oficio" && selectedValue) {
-    return `Instrumentos de ofício (${getOficioLabel(selectedValue).toLowerCase()})`;
+function formatOriginItemName(entry, selectedValue, selectedItems = {}, defaultInstrumentOficioId = "") {
+  if (entry.kind === "instrumentos_oficio") {
+    const oficioId = selectedValue || defaultInstrumentOficioId;
+    if (oficioId) return `Instrumentos de Of\u00edcio (${getOficioLabel(oficioId).toLowerCase()})`;
   }
   if (entry.kind === "crafted_item" && selectedValue) {
     const item = resolveCraftedCatalogItem(entry.catalog, selectedValue);
+    if (item?.id === "instrumentos_de_oficio") {
+      const oficioId = selectedItems[`${entry.id}:oficio`] || defaultInstrumentOficioId;
+      return oficioId ? `Instrumentos de Of\u00edcio (${getOficioLabel(oficioId).toLowerCase()})` : item.nome;
+    }
     if (item) return item.nome;
   }
   return entry.nome;
+}
+
+function formatInstrumentOficioButtonLabel(oficioId) {
+  return oficioId ? `Instrumento de of\u00edcio: ${getOficioLabel(oficioId).toLowerCase()}` : "Escolher instrumento de of\u00edcio";
 }
 
 function isArtistChoice(itemText) {
