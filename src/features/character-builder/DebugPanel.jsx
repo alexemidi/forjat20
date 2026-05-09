@@ -91,7 +91,7 @@ export function DebugPanel({ draft, catalogs }) {
 
   const race   = catalogs.races.find((r) => r.id === draft.info.racaId);
   const classe = catalogs.classes.find((c) => c.id === draft.info.classeId);
-  const origem = catalogs.origins.find((o) => o.id === draft.info.origemId);
+  const origem = catalogs.origins.find((o) => getCatalogEntryValue(o) === draft.info.origemId);
   const deus   = catalogs.gods.find((d) => d.id === draft.info.deusId);
 
   const nivel       = Number(draft.info.nivel ?? 1);
@@ -456,6 +456,10 @@ function normalizeDebugText(value) {
 
 function formatInventorySpaces(value) {
   return Number.isInteger(value) ? String(value) : String(value).replace(".", ",");
+}
+
+function getCatalogEntryValue(entry) {
+  return entry?.id ?? entry?.nome;
 }
 
 function DbgSection({ title, children }) {
