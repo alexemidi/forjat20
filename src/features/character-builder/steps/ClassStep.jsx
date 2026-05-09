@@ -1063,7 +1063,7 @@ function ClassGrantedSkills({ fixedEntries, classChoices, trainedIds, selectedOf
             >
               {entry.id === "oficio" && classChoices.oficiosFixos?.[`fixa_${index}`]
                 ? `Ofício (${getOficioLabel(classChoices.oficiosFixos[`fixa_${index}`]).toLowerCase()})`
-                : nomePericia(entry.id)}
+                : entry.id === "oficio" ? "Escolha o Ofício" : nomePericia(entry.id)}
             </button>
           );
         })}
@@ -1151,17 +1151,17 @@ function OficioOptions({ selectedOficios = [], onToggleOficio }) {
 
 function OficioPopover({ currentOficioId = "", disableNew = false, selectedOficios = [], anchorRect, onClose, onSelect }) {
   const selectedSet = new Set(selectedOficios);
-  /*
-  const style = anchorRect
+  const popoverWidth = 620;
+  const style = anchorRect && typeof window !== "undefined"
     ? {
-        left: Math.max(12, Math.min(anchorRect.left, window.innerWidth - 620)),
-        top: anchorRect.bottom + 8
+        left: Math.max(12, Math.min(anchorRect.left, window.innerWidth - popoverWidth - 12)),
+        top: anchorRect.bottom + 8,
+        width: `min(${popoverWidth}px, calc(100vw - 24px))`
       }
     : undefined;
-  */
 
   return (
-    <div className="class-oficio-popover" role="dialog" aria-modal="false" aria-label="Escolher ofício">
+    <div className="class-oficio-popover" role="dialog" aria-modal="false" aria-label="Escolher oficio" style={style}>
       <div className="class-oficio-popover__header">
         <strong>Ofício</strong>
         <button className="icon-button" onClick={onClose} type="button">
@@ -1225,7 +1225,7 @@ function SkillPicker({ title, description, limit, selected, options, blockedIds,
   allItems.push({
     type: "oficio-generic",
     id: "oficio",
-    nome: "Ofício",
+    nome: "Escolha o Ofício",
     selected: false
   });
 

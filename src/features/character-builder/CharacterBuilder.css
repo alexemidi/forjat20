@@ -483,8 +483,8 @@
   max-width: min(620px, calc(100vw - 48px));
   padding: 12px;
   left: 12px;
-  position: absolute;
-  top: calc(100% + 8px);
+  position: fixed;
+  top: 12px;
   width: min(620px, calc(100vw - 48px));
   z-index: 8;
 }
