@@ -494,7 +494,7 @@ function formatOriginItemName(entry, selectedValue) {
     return `Instrumentos de ofício (${getOficioLabel(selectedValue).toLowerCase()})`;
   }
   if (entry.kind === "crafted_item" && selectedValue) {
-    const item = getCraftedCatalogItems(entry.catalog).find((option) => option.id === selectedValue);
+    const item = resolveCraftedCatalogItem(entry.catalog, selectedValue);
     if (item) return item.nome;
   }
   return entry.nome;
@@ -560,7 +560,7 @@ function expandCraftableItemVariants(items = []) {
       id: `${item.id}:${variant.id}`,
       itemBaseId: item.id,
       varianteId: variant.id,
-      nome: variant.nome ?? item.nome
+      nome: variant.oficioId ? `Instrumentos de Of\u00edcio (${getOficioLabel(variant.oficioId).toLowerCase()})` : variant.nome ?? item.nome
     }));
   });
 }
@@ -613,6 +613,15 @@ function getCraftedCatalogItems(catalog) {
     ...(catalog.shields ?? []),
     ...(catalog.general ?? [])
   ];
+}
+
+function resolveCraftedCatalogItem(catalog, selectedValue) {
+  const items = getCraftedCatalogItems(catalog);
+  const exact = items.find((option) => option.id === selectedValue);
+  if (exact) return exact;
+
+  const variants = items.filter((option) => option.itemBaseId === selectedValue);
+  return variants.length === 1 ? variants[0] : null;
 }
 
 function getItemPriceValue(item) {
