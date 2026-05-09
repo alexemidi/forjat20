@@ -731,6 +731,7 @@
 
 .origin-oficio-popover {
   left: 0;
+  position: absolute;
   top: calc(100% + 8px);
   width: min(620px, calc(100vw - 48px));
 }

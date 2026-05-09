@@ -266,7 +266,7 @@ function OriginBenefitGrid({
                 type="button"
               >
                 <span className="choice-button__text">
-                  {selectedOficioId ? `Ofício (${getOficioLabel(selectedOficioId).toLowerCase()})` : benefit.isOficio ? "Escolha o Ofício" : benefit.nome}
+                  {selectedOficioId ? `Of\u00edcio (${getOficioLabel(selectedOficioId).toLowerCase()})` : benefit.isOficio ? "Escolha o Of\u00edcio" : benefit.nome}
                 </span>
                 {selectedOficioId ? (
                   <span
@@ -552,7 +552,7 @@ function getCraftedItemCatalog(items, maxPrice, selectedOficios = []) {
 }
 
 function canOficiosFabricateItem(item, selectedOficios = []) {
-  if (!selectedOficios.length) return true;
+  if (!selectedOficios.length) return false;
   const allowedKeys = getAllowedCraftKeysForOficios(selectedOficios);
   return getCraftKeysForItem(item).some((key) => allowedKeys.has(key));
 }
