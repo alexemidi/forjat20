@@ -266,7 +266,7 @@ function OriginBenefitGrid({
                 type="button"
               >
                 <span className="choice-button__text">
-                  {selectedOficioId ? `OfÃ­cio (${getOficioLabel(selectedOficioId).toLowerCase()})` : benefit.nome}
+                  {selectedOficioId ? `Ofício (${getOficioLabel(selectedOficioId).toLowerCase()})` : benefit.isOficio ? "Escolha o Ofício" : benefit.nome}
                 </span>
                 {selectedOficioId ? (
                   <span
@@ -321,7 +321,7 @@ function getOriginBenefits(origin, powers, trainedBeforeOrigin) {
       const periciaId = normalizeId(nome);
       const trainedOficios = getTrainedOficios(trainedBeforeOrigin);
       const alreadyTrained = periciaId === "oficio"
-        ? trainedOficios.size >= OFICIOS.length
+        ? OFICIOS.every((oficio) => trainedOficios.has(oficio.id))
         : trainedBeforeOrigin.has(periciaId);
       return {
         id: `pericia:${nome}`,
