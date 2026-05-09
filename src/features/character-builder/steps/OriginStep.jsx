@@ -533,7 +533,7 @@ function getCraftedItemPriceLimit(itemText) {
 }
 
 function getCraftedItemCatalog(items, maxPrice, selectedOficios = []) {
-  const availableItems = items
+  const availableItems = expandCraftableItemVariants(items)
     .filter((item) => ["arma", "armadura", "escudo", "item_geral"].includes(item.tipo))
     .filter((item) => !maxPrice || getItemPriceValue(item) <= maxPrice)
     .filter((item) => canOficiosFabricateItem(item, selectedOficios))
@@ -551,15 +551,31 @@ function getCraftedItemCatalog(items, maxPrice, selectedOficios = []) {
   };
 }
 
+function expandCraftableItemVariants(items = []) {
+  return items.flatMap((item) => {
+    if (!Array.isArray(item.variantes) || !item.variantes.length) return [item];
+    return item.variantes.map((variant) => ({
+      ...item,
+      ...variant,
+      id: `${item.id}:${variant.id}`,
+      itemBaseId: item.id,
+      varianteId: variant.id,
+      nome: variant.nome ?? item.nome
+    }));
+  });
+}
+
 function canOficiosFabricateItem(item, selectedOficios = []) {
   if (!selectedOficios.length) return false;
   const allowedKeys = getAllowedCraftKeysForOficios(selectedOficios);
+  if (item.oficioId) return allowedKeys.has(`oficio:${item.oficioId}`);
   return getCraftKeysForItem(item).some((key) => allowedKeys.has(key));
 }
 
 function getAllowedCraftKeysForOficios(selectedOficios = []) {
   const keys = new Set();
   selectedOficios.forEach((oficioId) => {
+    keys.add(`oficio:${oficioId}`);
     (OFICIO_CRAFT_KEYS[oficioId] ?? []).forEach((key) => keys.add(key));
   });
   return keys;
@@ -567,6 +583,8 @@ function getAllowedCraftKeysForOficios(selectedOficios = []) {
 
 function getCraftKeysForItem(item) {
   const keys = [item.id ? `item:${item.id}` : ""];
+  if (item.itemBaseId) keys.push(`item:${item.itemBaseId}`);
+  if (item.oficioId) keys.push(`oficio:${item.oficioId}`);
   if (["arma", "armadura", "escudo"].includes(item.tipo)) keys.push(item.tipo);
   if (item.tipo === "item_geral") keys.push(item.categoriaId);
   return keys.filter(Boolean);

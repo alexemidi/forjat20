@@ -8584,6 +8584,88 @@
       "efeitos": [],
       "livrosOrigemIds": [
         "basico"
+      ],
+      "variantes": [
+        {
+          "id": "alquimista",
+          "nome": "Instrumentos de Of?cio (alquimista)",
+          "oficioId": "alquimista"
+        },
+        {
+          "id": "armeiro",
+          "nome": "Instrumentos de Of?cio (armeiro)",
+          "oficioId": "armeiro"
+        },
+        {
+          "id": "artesao",
+          "nome": "Instrumentos de Of?cio (artes?o)",
+          "oficioId": "artesao"
+        },
+        {
+          "id": "cozinheiro",
+          "nome": "Instrumentos de Of?cio (cozinheiro)",
+          "oficioId": "cozinheiro"
+        },
+        {
+          "id": "engenhoqueiro",
+          "nome": "Instrumentos de Of?cio (engenhoqueiro)",
+          "oficioId": "engenhoqueiro"
+        },
+        {
+          "id": "escriba",
+          "nome": "Instrumentos de Of?cio (escriba)",
+          "oficioId": "escriba"
+        },
+        {
+          "id": "fazendeiro",
+          "nome": "Instrumentos de Of?cio (fazendeiro)",
+          "oficioId": "fazendeiro"
+        },
+        {
+          "id": "pescador",
+          "nome": "Instrumentos de Of?cio (pescador)",
+          "oficioId": "pescador"
+        },
+        {
+          "id": "mercador",
+          "nome": "Instrumentos de Of?cio (mercador)",
+          "oficioId": "mercador"
+        },
+        {
+          "id": "minerador",
+          "nome": "Instrumentos de Of?cio (minerador)",
+          "oficioId": "minerador"
+        },
+        {
+          "id": "alvenaria",
+          "nome": "Instrumentos de Of?cio (alvenaria)",
+          "oficioId": "alvenaria"
+        },
+        {
+          "id": "carpinteiro",
+          "nome": "Instrumentos de Of?cio (carpinteiro)",
+          "oficioId": "carpinteiro"
+        },
+        {
+          "id": "joalheiro",
+          "nome": "Instrumentos de Of?cio (joalheiro)",
+          "oficioId": "joalheiro"
+        },
+        {
+          "id": "estalajadeiro",
+          "nome": "Instrumentos de Of?cio (estalajadeiro)",
+          "oficioId": "estalajadeiro"
+        },
+        {
+          "id": "escultor",
+          "nome": "Instrumentos de Of?cio (escultor)",
+          "oficioId": "escultor"
+        },
+        {
+          "id": "pintor",
+          "nome": "Instrumentos de Of?cio (pintor)",
+          "oficioId": "pintor"
+        }
       ]
     },
     {
