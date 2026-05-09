@@ -40,7 +40,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const bonusNivelPericia = calcularBonusNivelPericia(nivel);
   const bonusTamanhoFurtividade = Number(options.bonusTamanhoFurtividade ?? 0);
 
-  const fixasClasse = new Set((classe?.caracteristicas?.pericias?.fixas ?? []).filter((p) => p.id).map((p) => p.id));
+  const fixasClasse = new Set((classe?.caracteristicas?.pericias?.fixas ?? []).filter((p) => p.id && p.id !== "oficio").map((p) => p.id));
   const fixasEscolhidasClasse = new Set(Object.values(escolhasClasse.periciasFixas ?? {}).filter(Boolean).map(getPericiaBaseId));
   const periciasEscolhidasRaca = new Set((escolhasClasse.periciasRaca ?? []).map(getPericiaBaseId));
   const periciasEscolhidasClasse = new Set((escolhasClasse.periciasClasse ?? []).map(getPericiaBaseId));
@@ -53,6 +53,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const pericias = PERICIAS.flatMap((pericia) => {
     const treinada =
       fixasClasse.has(pericia.id) ||
+      (pericia.id === "oficio" && oficiosSelecionados.length > 0) ||
       fixasEscolhidasClasse.has(pericia.id) ||
       periciasEscolhidasRaca.has(pericia.id) ||
       periciasEscolhidasClasse.has(pericia.id) ||

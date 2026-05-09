@@ -1393,7 +1393,7 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
   const fixedChoices = new Set(Object.values(classChoices.periciasFixas ?? {}).filter(Boolean).map(getPericiaBaseId));
   const fixedChoiceEntries = (classe?.caracteristicas?.pericias?.fixas ?? []).filter((entry) => entry.tipo === "escolha");
   for (const entry of classe?.caracteristicas?.pericias?.fixas ?? []) {
-    if (entry.id) fixedDirect.add(entry.id);
+    if (entry.id && entry.id !== "oficio") fixedDirect.add(entry.id);
   }
 
   const selectedRaceSkills = sanitizeSelection(classChoices.periciasRaca, PERICIAS);
@@ -1404,6 +1404,7 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
 
   const treinadas = new Set([...fixedDirect, ...fixedChoices, ...selectedRaceSkills.map(getPericiaBaseId), ...selectedClassSkills.map(getPericiaBaseId), ...selectedIntSkills.map(getPericiaBaseId), ...treinadasRaciais]);
+  if (selectedOficios.length > 0) treinadas.add("oficio");
   const raceChoiceLimit = race ? coletarQuantidadePericiasRaciaisEscolhiveis(race, raceChoices) : 0;
   const classChoiceLimit = classe?.caracteristicas?.pericias?.escolhas?.quantidade ?? 0;
   const intChoiceLimit = Math.max(0, Number(attrs.int ?? 0));
