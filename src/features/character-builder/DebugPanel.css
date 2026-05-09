@@ -134,6 +134,45 @@
   font-weight: 700;
 }
 
+.dbg__inventory-table {
+  display: grid;
+  gap: 0;
+}
+
+.dbg__inventory-head,
+.dbg__inventory-row,
+.dbg__inventory-total {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 42px 58px;
+}
+
+.dbg__inventory-head {
+  border-bottom: 1px solid #261a12;
+  color: #5a4538;
+  font-size: 0.68rem;
+  margin-bottom: 2px;
+  padding-bottom: 4px;
+}
+
+.dbg__inventory-row {
+  color: #ddd0c6;
+  padding: 1px 0;
+}
+
+.dbg__inventory-row span:not(:first-child),
+.dbg__inventory-head span:not(:first-child),
+.dbg__inventory-total span:not(:first-child) {
+  text-align: right;
+}
+
+.dbg__inventory-total {
+  border-top: 1px solid #261a12;
+  color: #c8a06a;
+  font-weight: 700;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
 .dbg__tag {
   background: #261a12;
   border: 1px solid #3d2b1e;

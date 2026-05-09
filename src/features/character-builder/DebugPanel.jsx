@@ -172,6 +172,7 @@ export function DebugPanel({ draft, catalogs }) {
   const proficienciasRaciais = race ? coletarProficienciasRaciais(race, raceChoices) : [];
   const bonusAtaqueRaciais = race ? coletarBonusAtaqueRaciais(race, raceChoices) : [];
   const bonusDanoRaciais = race ? coletarBonusDanoRaciais(race, raceChoices) : [];
+  const mochila = montarMochilaDebug(draft, catalogs, origem, pericias);
 
   // Redução de dano (structured)
   const rds = race ? coletarRDRaciais(race, raceChoices) : [];
@@ -265,6 +266,24 @@ export function DebugPanel({ draft, catalogs }) {
           ) : null}
         </DbgSection>
 
+        <DbgSection title="Mochila">
+          <div className="dbg__inventory-table">
+            <div className="dbg__inventory-head">
+              <span>Item</span><span>Qtd</span><span>Espa\u00e7os</span>
+            </div>
+            {mochila.itens.map((item) => (
+              <div className="dbg__inventory-row" key={item.key}>
+                <span>{item.nome}</span>
+                <span>{item.quantidade}</span>
+                <span>{formatInventorySpaces(item.espacosTotal)}</span>
+              </div>
+            ))}
+            <div className="dbg__inventory-total">
+              <span>Total</span><span>{mochila.quantidadeTotal}</span><span>{formatInventorySpaces(mochila.espacosTotal)}</span>
+            </div>
+          </div>
+        </DbgSection>
+
         <DbgSection title="Proficiências">
           {proficiencias.length || proficienciasRaciais.length || bonusAtaqueRaciais.length || bonusDanoRaciais.length
             ? proficiencias.map((p, i) => <div key={i} className="dbg__tag">{p}</div>)
@@ -339,6 +358,104 @@ export function DebugPanel({ draft, catalogs }) {
       </div>
     </div>
   );
+}
+
+const INITIAL_BACKPACK_ITEM_IDS = ["mochila", "saco_de_dormir", "traje_de_viajante"];
+
+const OFICIO_LABELS = {
+  alquimista: "alquimista",
+  armeiro: "armeiro",
+  artesao: "artes\u00e3o",
+  cozinheiro: "cozinheiro",
+  engenhoqueiro: "engenhoqueiro",
+  escriba: "escriba",
+  fazendeiro: "fazendeiro",
+  pescador: "pescador",
+  mercador: "mercador",
+  minerador: "minerador",
+  alvenaria: "alvenaria",
+  carpinteiro: "carpinteiro",
+  joalheiro: "joalheiro",
+  estalajadeiro: "estalajadeiro",
+  escultor: "escultor",
+  pintor: "pintor"
+};
+
+function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
+  const entries = new Map();
+  const selectedOriginItems = draft.escolhas?.origem?.itens ?? {};
+  const defaultOficioId = pericias.find((pericia) => String(pericia.id).startsWith("oficio:"))?.id?.slice("oficio:".length) ?? "";
+
+  function addItem(itemId, quantidade = 1, nomeOverride = "") {
+    if (!itemId) return;
+    const catalogItem = catalogs.items.find((item) => item.id === itemId);
+    const nome = nomeOverride || catalogItem?.nome || itemId;
+    const espacosUnitarios = Number(catalogItem?.espacos ?? 0);
+    const key = `${itemId}:${nome}`;
+    const current = entries.get(key) ?? { key, nome, quantidade: 0, espacosTotal: 0 };
+    current.quantidade += quantidade;
+    current.espacosTotal += espacosUnitarios * quantidade;
+    entries.set(key, current);
+  }
+
+  function addInstrumentosOficio(oficioId) {
+    const label = oficioId ? ` (${OFICIO_LABELS[oficioId] ?? oficioId})` : "";
+    addItem("instrumentos_de_oficio", 1, `Instrumentos de Of\u00edcio${label}`);
+  }
+
+  INITIAL_BACKPACK_ITEM_IDS.forEach((itemId) => addItem(itemId));
+
+  (origem?.itens ?? []).forEach((itemText, index) => {
+    const slotId = `item_${index}`;
+    const selectedItemId = selectedOriginItems[slotId];
+
+    if (isDebugOficioInstrumentChoice(itemText)) {
+      addInstrumentosOficio(selectedItemId || defaultOficioId);
+      return;
+    }
+
+    if (selectedItemId === "instrumentos_de_oficio") {
+      addInstrumentosOficio(selectedOriginItems[`${slotId}:oficio`] || defaultOficioId);
+      return;
+    }
+
+    if (selectedItemId) {
+      addItem(selectedItemId);
+      return;
+    }
+
+    const fixedItem = catalogs.items.find((item) => normalizeDebugText(item.nome) === normalizeDebugText(itemText));
+    if (fixedItem) addItem(fixedItem.id);
+  });
+
+  const prototipo = draft.escolhas?.classe?.prototipo ?? {};
+  if (prototipo.itemSuperior?.itemId) addItem(prototipo.itemSuperior.itemId);
+  (prototipo.alquimicos ?? []).forEach((itemId) => addItem(itemId));
+  (draft.escolhas?.equipamentoInicialIds ?? []).forEach((itemId) => addItem(itemId));
+  (draft.inventario?.itens ?? []).forEach((item) => addItem(item.itemId, Number(item.quantidade ?? 1) || 1));
+
+  const itens = [...entries.values()].sort((a, b) => a.nome.localeCompare(b.nome));
+  return {
+    itens,
+    quantidadeTotal: itens.reduce((total, item) => total + item.quantidade, 0),
+    espacosTotal: itens.reduce((total, item) => total + item.espacosTotal, 0)
+  };
+}
+
+function isDebugOficioInstrumentChoice(itemText) {
+  const normalized = normalizeDebugText(itemText);
+  return normalized.includes("instrumentos de oficio") && normalized.includes("qualquer");
+}
+
+function normalizeDebugText(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function formatInventorySpaces(value) {
+  return Number.isInteger(value) ? String(value) : String(value).replace(".", ",");
 }
 
 function DbgSection({ title, children }) {
