@@ -28,6 +28,8 @@ export function CharacterBuilder({ appContext, onBackHome }) {
       classPowers: filterByBooks(catalogs.classPowers, selectedBooks),
       personalStrikeEffects: catalogs.personalStrikeEffects,
       items: filterByBooks(catalogs.items, selectedBooks),
+      improvements: filterByBooks(catalogs.improvements, selectedBooks),
+      specialMaterials: filterByBooks(catalogs.specialMaterials, selectedBooks),
       spells: filterByBooks(catalogs.spells, selectedBooks)
     }),
     [catalogs, selectedBooks]
