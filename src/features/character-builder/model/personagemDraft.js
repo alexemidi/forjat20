@@ -43,6 +43,12 @@ export function criarPersonagemDraft() {
         periciasInteligencia: [],
         oficiosFixos: {},
         poderesClasse: [],
+        arcanista: {
+          caminhoId: "",
+          linhagemId: "",
+          tipoDanoDraconico: "",
+          deusMaiorId: ""
+        },
         prototipo: {
           modo: "",
           itemSuperior: {

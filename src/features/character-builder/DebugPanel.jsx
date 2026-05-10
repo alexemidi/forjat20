@@ -10,6 +10,7 @@ import {
   obterBeneficiosMontaria
 } from "../../core/rules/combate.js";
 import { ATRIBUTOS, calcularAtributosComEscolhas, calcularBonusRacial } from "./model/atributos.js";
+import { calcularInfoMagiaPersonagem } from "./model/magiasPersonagem.js";
 import { calcularPericiasPersonagem } from "./model/periciasPersonagem.js";
 import {
   calcularBonusPericiasRaciais,
@@ -99,6 +100,7 @@ export function DebugPanel({ draft, catalogs }) {
   const raceChoices = draft.escolhas.raca ?? {};
 
   const attrs = calcularAtributosComEscolhas(draft.atributosBase, race, raceChoices);
+  const magiaInfo = calcularInfoMagiaPersonagem(draft, classe, attrs);
 
   // PV / PM
   const pvCfg = classe?.caracteristicas?.pv;
@@ -268,6 +270,13 @@ export function DebugPanel({ draft, catalogs }) {
             </>
           ) : null}
         </DbgSection>
+
+        {magiaInfo ? (
+          <DbgSection title="Magias">
+            <DbgRow label="Atributo-chave" value={magiaInfo.atributoNome} sub={magiaInfo.atributoId.toUpperCase()} />
+            <DbgRow label="CD" value={magiaInfo.cd} sub={magiaInfo.formula} />
+          </DbgSection>
+        ) : null}
 
         <DbgSection title="Mochila">
           <DbgInventoryWeapons items={mochila.armas} pericias={pericias} catalogs={catalogs} />

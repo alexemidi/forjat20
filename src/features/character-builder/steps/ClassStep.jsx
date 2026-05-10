@@ -13,6 +13,7 @@ import {
   detalharBonusPmRacial,
   detalharBonusPvRacial
 } from "../model/racaEfeitos.js";
+import { calcularInfoMagiaPersonagem } from "../model/magiasPersonagem.js";
 
 export function ClassStep({ catalogs, draft, updateDraft }) {
   const selectedClass = catalogs.classes.find((classe) => classe.id === draft.info.classeId);
@@ -23,6 +24,7 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
   const attrs = calcularAtributosComEscolhas(draft.atributosBase, race, raceChoices);
 
   const recursos = calcularRecursos(selectedClass, race, raceChoices, attrs, nivel);
+  const magiaInfo = calcularInfoMagiaPersonagem(draft, selectedClass, attrs);
   const periciasInfo = calcularPericias(selectedClass, race, raceChoices, classChoices, attrs, nivel);
   const classPowerOptions = (catalogs.classPowers ?? [])
     .filter((power) => power.classeId === selectedClass?.id)
@@ -52,6 +54,12 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
       periciasInteligencia: [],
       oficiosFixos: {},
       poderesClasse: [],
+      arcanista: {
+        caminhoId: "",
+        linhagemId: "",
+        tipoDanoDraconico: "",
+        deusMaiorId: ""
+      },
       prototipo: {
         modo: "",
         itemSuperior: {
@@ -188,6 +196,14 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
               value={nivel}
               formula={`${habilidadesAtivas.length} habilidade${habilidadesAtivas.length === 1 ? "" : "s"} ativa${habilidadesAtivas.length === 1 ? "" : "s"}`}
             />
+            {magiaInfo ? (
+              <ResourceCard
+                label="Magia"
+                value={`CD ${magiaInfo.cd}`}
+                formula={`${magiaInfo.atributoNome} (${magiaInfo.atributoId.toUpperCase()})`}
+                extra={magiaInfo.formula}
+              />
+            ) : null}
           </section>
 
           {classPowerLimit > 0 ? (
@@ -369,6 +385,9 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
                     <span>Nivel {ability.nivel ?? 1}</span>
                   </div>
                   {ability.descricao ? <p>{ability.descricao}</p> : <p className="muted">Sem descricao registrada.</p>}
+                  {ability.id === "arcanista_caminho_do_arcanista" ? (
+                    <ArcanistPathChoice ability={ability} catalogs={catalogs} classChoices={classChoices} attrs={attrs} nivel={nivel} updateDraft={updateDraft} />
+                  ) : null}
                   {ability.id === "inventor_prototipo" ? (
                     <InventorPrototypeChoice catalogs={catalogs} classChoices={classChoices} updateDraft={updateDraft} />
                   ) : null}
@@ -427,6 +446,180 @@ function ClassPowerPicker({ attrs, limit, nivel, onRemove, onToggle, options, pe
       })}
     </div>
   );
+}
+
+function ArcanistPathChoice({ ability, catalogs, classChoices, attrs, nivel, updateDraft }) {
+  const choices = classChoices.arcanista ?? {};
+  const caminhoOptions = (ability.escolhas ?? []).map((option) => ({
+    ...option,
+    id: slugArcanistOption(option.nome)
+  }));
+  const selectedPath = caminhoOptions.find((option) => option.id === choices.caminhoId);
+  const lineageOptions = selectedPath?.id === "feiticeiro"
+    ? (selectedPath.escolhas_secundarias ?? []).map((option) => ({ ...option, id: option.id ?? slugArcanistOption(option.nome) }))
+    : [];
+  const selectedLineage = lineageOptions.find((option) => option.id === choices.linhagemId);
+  const magicAttr = selectedPath?.id === "feiticeiro" ? "car" : selectedPath?.id === "bruxo" || selectedPath?.id === "mago" ? "int" : "";
+  const magicCd = magicAttr ? 10 + Math.floor(Number(nivel ?? 1) / 2) + Number(attrs[magicAttr] ?? 0) : null;
+
+  function selectPath(pathId) {
+    updateDraft("escolhas.classe.arcanista", {
+      caminhoId: pathId,
+      linhagemId: "",
+      tipoDanoDraconico: "",
+      deusMaiorId: ""
+    });
+  }
+
+  function selectLineage(lineageId) {
+    updateDraft("escolhas.classe.arcanista", {
+      ...choices,
+      caminhoId: "feiticeiro",
+      linhagemId: lineageId,
+      tipoDanoDraconico: "",
+      deusMaiorId: ""
+    });
+  }
+
+  return (
+    <div className="class-choice-panel">
+      <div className="builder-section__header">
+        <div>
+          <h3>Caminho do Arcanista</h3>
+          <p>Escolha permanente. Define o atributo-chave das magias.</p>
+        </div>
+        {magicCd ? <span className="pill">CD {magicCd}</span> : null}
+      </div>
+      <div className="class-power-grid">
+        {caminhoOptions.map((option) => (
+          <ChoiceCard
+            active={choices.caminhoId === option.id}
+            key={option.id}
+            onClick={() => selectPath(option.id)}
+            title={option.nome}
+            description={option.descricao}
+          />
+        ))}
+      </div>
+
+      {selectedPath ? (
+        <p className="class-prototype-result">
+          Atributo-chave: <strong>{magicAttr === "car" ? "Carisma" : "Inteligência"}</strong>. CD de magia: <strong>{magicCd}</strong>.
+        </p>
+      ) : null}
+
+      {lineageOptions.length ? (
+        <div className="class-choice-subpanel">
+          <div className="builder-section__header">
+            <div>
+              <h3>Linhagem Sobrenatural</h3>
+              <p>O feiticeiro recebe a herança básica da linhagem escolhida.</p>
+            </div>
+          </div>
+          <div className="class-power-grid">
+            {lineageOptions.map((option) => (
+              <ChoiceCard
+                active={choices.linhagemId === option.id}
+                key={option.id}
+                onClick={() => selectLineage(option.id)}
+                title={option.nome}
+                description={option.estagios?.find((stage) => stage.id === "basica")?.descricao ?? option.descricao}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {selectedLineage?.id === "linhagem_draconica" ? (
+        <ArcanistSmallChoice
+          label="Tipo de dano dracônico"
+          options={[
+            ["acido", "Ácido"],
+            ["eletricidade", "Eletricidade"],
+            ["fogo", "Fogo"],
+            ["frio", "Frio"]
+          ]}
+          value={choices.tipoDanoDraconico}
+          onChange={(value) => updateDraft("escolhas.classe.arcanista.tipoDanoDraconico", value)}
+        />
+      ) : null}
+
+      {selectedLineage?.id === "linhagem_abencoada" ? (
+        <div className="class-choice-subpanel">
+          <SelectInput
+            id="arcanist-blessed-god"
+            label="Deus maior da linhagem abençoada"
+            onChange={(event) => updateDraft("escolhas.classe.arcanista.deusMaiorId", event.target.value)}
+            value={choices.deusMaiorId ?? ""}
+          >
+            <option value="">Selecione</option>
+            {catalogs.gods.map((god) => {
+              const value = getCatalogEntryValue(god);
+              return (
+                <option key={value} value={value}>
+                  {god.nome}
+                </option>
+              );
+            })}
+          </SelectInput>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ChoiceCard({ active, title, description, onClick }) {
+  return (
+    <article className={`class-power-card${active ? " class-power-card--active" : ""}`}>
+      <div className="class-power-card__header">
+        <strong>{title}</strong>
+      </div>
+      <p>{description}</p>
+      <div className="class-power-card__actions">
+        <button onClick={onClick} type="button">
+          {active ? "Selecionado" : "Escolher"}
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function ArcanistSmallChoice({ label, options, value, onChange }) {
+  return (
+    <div className="class-choice-subpanel">
+      <div className="builder-section__header">
+        <div>
+          <h3>{label}</h3>
+        </div>
+      </div>
+      <div className="choice-button-grid">
+        {options.map(([optionValue, optionLabel]) => (
+          <button
+            className={`choice-button${value === optionValue ? " choice-button--active" : ""}`}
+            key={optionValue}
+            onClick={() => onChange(optionValue)}
+            type="button"
+          >
+            {optionLabel}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function slugArcanistOption(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/^linhagem_?/, "linhagem_")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function getCatalogEntryValue(entry) {
+  return entry?.id ?? entry?.nome;
 }
 
 function ResourceCard({ label, value, formula, extra }) {
@@ -1468,10 +1661,11 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
   const selectedClassSkills = sanitizeSelection(classChoices.periciasClasse, classe?.caracteristicas?.pericias?.escolhas?.opcoes ?? []);
   const selectedIntSkills = sanitizeSelection(classChoices.periciasInteligencia, PERICIAS);
   const selectedOficios = getSelectedOficios(classChoices);
+  const classChoiceGrantedSkills = getClassChoiceGrantedSkills(classChoices);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
 
-  const treinadas = new Set([...fixedDirect, ...fixedChoices, ...selectedRaceSkills.map(getPericiaBaseId), ...selectedClassSkills.map(getPericiaBaseId), ...selectedIntSkills.map(getPericiaBaseId), ...treinadasRaciais]);
+  const treinadas = new Set([...fixedDirect, ...fixedChoices, ...selectedRaceSkills.map(getPericiaBaseId), ...selectedClassSkills.map(getPericiaBaseId), ...selectedIntSkills.map(getPericiaBaseId), ...classChoiceGrantedSkills, ...treinadasRaciais]);
   if (selectedOficios.length > 0) treinadas.add("oficio");
   const raceChoiceLimit = race ? coletarQuantidadePericiasRaciaisEscolhiveis(race, raceChoices) : 0;
   const classChoiceLimit = classe?.caracteristicas?.pericias?.escolhas?.quantidade ?? 0;
@@ -1519,6 +1713,12 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
     blockedForIntChoices,
     classChoicesComplete
   };
+}
+
+function getClassChoiceGrantedSkills(classChoices = {}) {
+  const granted = [];
+  if (classChoices.arcanista?.linhagemId === "linhagem_feerica") granted.push("enganacao");
+  return granted;
 }
 
 function sanitizeSelection(selection = [], options = []) {

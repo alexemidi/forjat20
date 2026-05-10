@@ -47,6 +47,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const periciasInteligenciaClasse = new Set((escolhasClasse.periciasInteligencia ?? []).map(getPericiaBaseId));
   const periciasOrigem = new Set(getPericiasOrigemSelecionadas(escolhasOrigem));
   const oficiosSelecionados = getSelectedOficios(escolhasClasse, escolhasOrigem);
+  const periciasConcedidasEscolhasClasse = getClassChoiceGrantedSkills(escolhasClasse);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
   const bonusPericiasItens = coletarBonusPericiasMelhorias(draft, catalogs);
@@ -60,6 +61,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
       periciasEscolhidasClasse.has(pericia.id) ||
       periciasInteligenciaClasse.has(pericia.id) ||
       periciasOrigem.has(pericia.id) ||
+      periciasConcedidasEscolhasClasse.has(pericia.id) ||
       treinadasRaciais.has(pericia.id);
     const atributoValor = Number(attrs[pericia.atributo] ?? 0);
     const racial = Number(bonusRacial[pericia.id] ?? 0);
@@ -95,6 +97,12 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   });
 
   return { pericias, bonusNivelPericia };
+}
+
+function getClassChoiceGrantedSkills(classChoices = {}) {
+  const granted = [];
+  if (classChoices.arcanista?.linhagemId === "linhagem_feerica") granted.push("enganacao");
+  return new Set(granted);
 }
 
 function coletarBonusPericiasMelhorias(draft, catalogs) {
