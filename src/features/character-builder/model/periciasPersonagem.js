@@ -47,7 +47,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const periciasInteligenciaClasse = new Set((escolhasClasse.periciasInteligencia ?? []).map(getPericiaBaseId));
   const periciasOrigem = new Set(getPericiasOrigemSelecionadas(escolhasOrigem));
   const oficiosSelecionados = getSelectedOficios(escolhasClasse, escolhasOrigem);
-  const periciasConcedidasEscolhasClasse = getClassChoiceGrantedSkills(escolhasClasse);
+  const periciasConcedidasEscolhasClasse = getClassChoiceGrantedSkills(classe, escolhasClasse);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
   const bonusPericiasItens = coletarBonusPericiasMelhorias(draft, catalogs);
@@ -99,10 +99,42 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   return { pericias, bonusNivelPericia };
 }
 
-function getClassChoiceGrantedSkills(classChoices = {}) {
+function getClassChoiceGrantedSkills(classe, classChoices = {}) {
   const granted = [];
   if (classChoices.arcanista?.linhagemId === "linhagem_feerica") granted.push("enganacao");
+  collectClassAbilityChoiceOptions(classe, classChoices).forEach((option) => {
+    if (option.pericia?.id) granted.push(option.pericia.id);
+    if (isPericiaId(option.id)) granted.push(option.id);
+    if (String(option.id ?? "").startsWith("oficio_")) granted.push("oficio");
+  });
   return new Set(granted);
+}
+
+function collectClassAbilityChoiceOptions(classe, classChoices = {}) {
+  const selectedByAbility = classChoices.habilidades ?? {};
+  return (classe?.habilidades ?? []).flatMap((ability) => {
+    const selectedByChoice = selectedByAbility[ability.id] ?? {};
+    return (ability.escolhas ?? []).flatMap((choice) => {
+      const selected = selectedByChoice[choice.id];
+      const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
+      return selectedIds
+        .map((id) => (choice.opcoes ?? []).find((option) => getChoiceOptionId(option) === id))
+        .filter(Boolean)
+        .map(normalizeClassChoiceOption);
+    });
+  });
+}
+
+function getChoiceOptionId(option) {
+  return typeof option === "string" ? option : option?.id ?? option?.nome;
+}
+
+function normalizeClassChoiceOption(option) {
+  return typeof option === "string" ? { id: option } : option;
+}
+
+function isPericiaId(value) {
+  return PERICIAS.some((pericia) => pericia.id === value);
 }
 
 function coletarBonusPericiasMelhorias(draft, catalogs) {
@@ -164,5 +196,10 @@ function getSelectedOficios(classChoices = {}, originChoices = {}) {
     .filter((id) => String(id).startsWith("pericia:Ofício:") || String(id).startsWith("pericia:Oficio:"))
     .map((id) => String(id).split(":").at(-1))
     .filter(Boolean);
-  return [...new Set([...fixed.filter(Boolean), ...fromSelections, ...fromOrigin])];
+  const fromAbilityChoices = Object.values(classChoices.habilidades ?? {})
+    .flatMap((choiceMap) => Object.values(choiceMap ?? {}))
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .filter((id) => String(id).startsWith("oficio_"))
+    .map((id) => String(id).slice("oficio_".length));
+  return [...new Set([...fixed.filter(Boolean), ...fromSelections, ...fromOrigin, ...fromAbilityChoices])];
 }

@@ -60,6 +60,7 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
         tipoDanoDraconico: "",
         deusMaiorId: ""
       },
+      habilidades: {},
       prototipo: {
         modo: "",
         itemSuperior: {
@@ -388,6 +389,14 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
                   {ability.id === "arcanista_caminho_do_arcanista" ? (
                     <ArcanistPathChoice ability={ability} catalogs={catalogs} classChoices={classChoices} attrs={attrs} nivel={nivel} updateDraft={updateDraft} />
                   ) : null}
+                  {shouldRenderGenericClassChoices(ability) ? (
+                    <ClassAbilityChoices
+                      ability={ability}
+                      classChoices={classChoices}
+                      nivel={nivel}
+                      updateDraft={updateDraft}
+                    />
+                  ) : null}
                   {ability.id === "inventor_prototipo" ? (
                     <InventorPrototypeChoice catalogs={catalogs} classChoices={classChoices} updateDraft={updateDraft} />
                   ) : null}
@@ -560,14 +569,128 @@ function ArcanistPathChoice({ ability, catalogs, classChoices, attrs, nivel, upd
   );
 }
 
-function SimpleSegment({ label, value, options, labels = {}, onChange }) {
+function ClassAbilityChoices({ ability, classChoices, nivel, updateDraft }) {
+  const abilityChoices = classChoices.habilidades?.[ability.id] ?? {};
+  const visibleChoices = (ability.escolhas ?? [])
+    .map((choice) => ({
+      ...choice,
+      options: getClassChoiceOptions(choice, nivel)
+    }))
+    .filter((choice) => choice.options.length && !isDeferredClassChoice(choice));
+
+  if (!visibleChoices.length) return null;
+
+  function setChoice(choice, optionId) {
+    const current = abilityChoices[choice.id];
+    const limit = Number(choice.quantidade ?? 1);
+    const nextValue = limit > 1
+      ? toggleChoiceArray(Array.isArray(current) ? current : [], optionId, limit)
+      : optionId;
+    updateDraft(`escolhas.classe.habilidades.${ability.id}.${choice.id}`, nextValue);
+  }
+
+  return (
+    <div className="class-choice-panel">
+      {visibleChoices.map((choice, index) => {
+        const selected = abilityChoices[choice.id];
+        const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
+        return (
+          <div className="class-choice-group" key={choice.id}>
+            <SimpleSegment
+              label={`${index + 1}. ${choice.nome ?? formatClassChoiceLabel(choice.id)}`}
+              value={Number(choice.quantidade ?? 1) > 1 ? "" : selectedIds[0] ?? ""}
+              selected={selectedIds}
+              options={choice.options.map((option) => option.id)}
+              labels={Object.fromEntries(choice.options.map((option) => [option.id, option.nome]))}
+              onChange={(value) => setChoice(choice, value)}
+            />
+            {selectedIds.map((optionId) => {
+              const option = choice.options.find((entry) => entry.id === optionId);
+              if (!option) return null;
+              return (
+                <ChoiceDescription key={optionId} title={option.nome}>
+                  {formatClassChoiceDescription(option)}
+                </ChoiceDescription>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function shouldRenderGenericClassChoices(ability) {
+  if (!ability?.escolhas?.length) return false;
+  if (ability.id === "arcanista_caminho_do_arcanista" || ability.id === "inventor_prototipo") return false;
+  if (String(ability.id ?? "").includes("magias")) return false;
+  return ability.escolhas.some((choice) => getClassChoiceOptions(choice, 20).length && !isDeferredClassChoice(choice));
+}
+
+function isDeferredClassChoice(choice) {
+  const id = String(choice.id ?? "");
+  const name = String(choice.nome ?? "");
+  if (choice.origemDados || choice.filtro || choice.quantidadeAtributo || choice.quantidadePorNivel || choice.quantidadePontos || choice.precoMaximo) return true;
+  if (/magia|magias|poder|poderes|escola/i.test(`${id} ${name}`)) return true;
+  return false;
+}
+
+function getClassChoiceOptions(choice, nivel) {
+  const rawOptions = [
+    ...(choice.opcoes ?? []),
+    ...(Number(nivel ?? 1) >= 11 ? choice.opcoesNivel11 ?? [] : [])
+  ];
+  return rawOptions.map((option) => normalizeClassChoiceOption(option)).filter(Boolean);
+}
+
+function normalizeClassChoiceOption(option) {
+  if (typeof option === "string") {
+    return { id: option, nome: formatClassChoiceLabel(option), descricao: "" };
+  }
+  if (!option || typeof option !== "object") return null;
+  const id = option.id ?? option.nome;
+  if (!id) return null;
+  return {
+    ...option,
+    id,
+    nome: option.nome ?? formatClassChoiceLabel(id),
+    descricao: option.descricao ?? option.estagios?.find((stage) => stage.id === "basica")?.descricao ?? ""
+  };
+}
+
+function formatClassChoiceDescription(option) {
+  if (option.descricao) return option.descricao;
+  const details = [];
+  if (option.atributo) details.push(`Atributo: ${String(option.atributo).toUpperCase()}.`);
+  if (option.tipoDano) details.push(`Tipo de dano: ${formatClassChoiceLabel(option.tipoDano)}.`);
+  if (option.escolaMagia) details.push(`Escola de magia: ${formatClassChoiceLabel(option.escolaMagia)}.`);
+  if (option.pericia?.id) details.push(`Perícia: ${formatClassChoiceLabel(option.pericia.id)}.`);
+  return details.length ? details.join(" ") : "Escolha registrada para esta habilidade.";
+}
+
+function toggleChoiceArray(current, optionId, limit) {
+  if (current.includes(optionId)) return current.filter((id) => id !== optionId);
+  if (current.length >= limit) return [...current.slice(1), optionId];
+  return [...current, optionId];
+}
+
+function formatClassChoiceLabel(value) {
+  const normalized = String(value ?? "").replace(/^oficio_/, "Ofício ");
+  return normalized
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function SimpleSegment({ label, value, selected = [], options, labels = {}, onChange }) {
   return (
     <div className="choice-panel">
       <label className="choice-label">{label}</label>
       <div className="choice-button-grid">
         {options.map((option) => (
           <button
-            className={`choice-button${value === option ? " choice-button--active" : ""}`}
+            className={`choice-button${value === option || selected.includes(option) ? " choice-button--active" : ""}`}
             key={option}
             onClick={() => onChange(option)}
             type="button"
@@ -1642,7 +1765,7 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
   const selectedClassSkills = sanitizeSelection(classChoices.periciasClasse, classe?.caracteristicas?.pericias?.escolhas?.opcoes ?? []);
   const selectedIntSkills = sanitizeSelection(classChoices.periciasInteligencia, PERICIAS);
   const selectedOficios = getSelectedOficios(classChoices);
-  const classChoiceGrantedSkills = getClassChoiceGrantedSkills(classChoices);
+  const classChoiceGrantedSkills = getClassChoiceGrantedSkills(classe, classChoices);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
 
@@ -1696,10 +1819,34 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
   };
 }
 
-function getClassChoiceGrantedSkills(classChoices = {}) {
+function getClassChoiceGrantedSkills(classe, classChoices = {}) {
   const granted = [];
   if (classChoices.arcanista?.linhagemId === "linhagem_feerica") granted.push("enganacao");
+  collectClassAbilityChoiceOptions(classe, classChoices).forEach((option) => {
+    if (option.pericia?.id) granted.push(option.pericia.id);
+    if (PERICIAS.some((pericia) => pericia.id === option.id)) granted.push(option.id);
+    if (String(option.id ?? "").startsWith("oficio_")) granted.push("oficio");
+  });
   return granted;
+}
+
+function collectClassAbilityChoiceOptions(classe, classChoices = {}) {
+  const selectedByAbility = classChoices.habilidades ?? {};
+  return (classe?.habilidades ?? []).flatMap((ability) => {
+    const selectedByChoice = selectedByAbility[ability.id] ?? {};
+    return (ability.escolhas ?? []).flatMap((choice) => {
+      const selected = selectedByChoice[choice.id];
+      const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
+      return selectedIds
+        .map((id) => (choice.opcoes ?? []).find((option) => getClassChoiceOptionId(option) === id))
+        .filter(Boolean)
+        .map((option) => (typeof option === "string" ? { id: option } : option));
+    });
+  });
+}
+
+function getClassChoiceOptionId(option) {
+  return typeof option === "string" ? option : option?.id ?? option?.nome;
 }
 
 function sanitizeSelection(selection = [], options = []) {
@@ -1744,8 +1891,14 @@ function getSelectedOficios(classChoices = {}) {
     .filter((id) => String(id).startsWith("oficio:"))
     .map((id) => String(id).slice("oficio:".length));
   
+  const fromAbilityChoices = Object.values(classChoices.habilidades ?? {})
+    .flatMap((choiceMap) => Object.values(choiceMap ?? {}))
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .filter((id) => String(id).startsWith("oficio_"))
+    .map((id) => String(id).slice("oficio_".length));
+
   // Combinar e deduplica
-  return [...new Set([...fixed.filter(Boolean), ...fromSelections])];
+  return [...new Set([...fixed.filter(Boolean), ...fromSelections, ...fromAbilityChoices])];
 }
 
 function filterSkillOptions(options, blockedIds, selectedIds, selectedOficios) {

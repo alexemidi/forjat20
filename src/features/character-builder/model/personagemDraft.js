@@ -49,6 +49,7 @@ export function criarPersonagemDraft() {
           tipoDanoDraconico: "",
           deusMaiorId: ""
         },
+        habilidades: {},
         prototipo: {
           modo: "",
           itemSuperior: {
