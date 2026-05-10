@@ -14,10 +14,40 @@ export function filterByBooks(entries, selectedBooks) {
   if (!selectedBooks?.length) return entries;
   const selected = new Set(selectedBooks);
 
-  return entries.filter((entry) => {
-    const origins = getBookIds(entry);
-    return origins.length === 0 || origins.some((bookId) => selected.has(bookId));
-  });
+  return entries.filter((entry) => entryMatchesBooks(entry, selected));
+}
+
+export function filterCatalogByBooks(entries, selectedBooks) {
+  if (!Array.isArray(entries)) return [];
+  if (!selectedBooks?.length) return entries;
+  const selected = new Set(selectedBooks);
+
+  return entries
+    .filter((entry) => entryMatchesBooks(entry, selected))
+    .map((entry) => filterEntryTreeByBooks(entry, selected));
+}
+
+export function entryMatchesBooks(entry, selectedBooks) {
+  const selected = selectedBooks instanceof Set ? selectedBooks : new Set(selectedBooks ?? []);
+  const origins = getBookIds(entry);
+  return origins.length === 0 || origins.some((bookId) => selected.has(bookId));
+}
+
+function filterEntryTreeByBooks(value, selectedBooks) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item) => !isCatalogObject(item) || entryMatchesBooks(item, selectedBooks))
+      .map((item) => filterEntryTreeByBooks(item, selectedBooks));
+  }
+  if (!isCatalogObject(value)) return value;
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, itemValue]) => [key, filterEntryTreeByBooks(itemValue, selectedBooks)])
+  );
+}
+
+function isCatalogObject(value) {
+  return Boolean(value) && typeof value === "object";
 }
 
 export function filterBySearch(entries, search, selectors = [(entry) => entry.nome ?? entry.name ?? ""]) {

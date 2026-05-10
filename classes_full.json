@@ -349,6 +349,9 @@
               {
                 "id": "linhagem_abencoada",
                 "nome": "Linhagem Abençoada",
+                "livrosOrigemIds": [
+                  "deuses_de_arton"
+                ],
                 "descricao": "Seu sangue flui com energia divina.",
                 "escolhas_terciarias": [
                   {

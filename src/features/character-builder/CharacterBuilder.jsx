@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Home } from "lucide-react";
 import { useMemo, useState } from "react";
 import { creationPages } from "../../data/catalogos.js";
-import { filterByBooks } from "../../shared/lib/catalogFilters.js";
+import { filterCatalogByBooks } from "../../shared/lib/catalogFilters.js";
 import { Button } from "../../shared/ui/Button.jsx";
 import { criarPersonagemDraft } from "./model/personagemDraft.js";
 import { DebugPanel } from "./DebugPanel.jsx";
@@ -19,18 +19,18 @@ export function CharacterBuilder({ appContext, onBackHome }) {
 
   const filtered = useMemo(
     () => ({
-      races: filterByBooks(catalogs.races, selectedBooks),
-      classes: filterByBooks(catalogs.classes, selectedBooks),
-      origins: filterByBooks(catalogs.origins, selectedBooks),
-      regionalOrigins: filterByBooks(catalogs.regionalOrigins, selectedBooks),
-      gods: filterByBooks(catalogs.gods, selectedBooks),
-      powers: filterByBooks(catalogs.powers, selectedBooks),
-      classPowers: filterByBooks(catalogs.classPowers, selectedBooks),
+      races: filterCatalogByBooks(catalogs.races, selectedBooks),
+      classes: filterCatalogByBooks(catalogs.classes, selectedBooks),
+      origins: filterCatalogByBooks(catalogs.origins, selectedBooks),
+      regionalOrigins: filterCatalogByBooks(catalogs.regionalOrigins, selectedBooks),
+      gods: filterCatalogByBooks(catalogs.gods, selectedBooks),
+      powers: filterCatalogByBooks(catalogs.powers, selectedBooks),
+      classPowers: filterCatalogByBooks(catalogs.classPowers, selectedBooks),
       personalStrikeEffects: catalogs.personalStrikeEffects,
-      items: filterByBooks(catalogs.items, selectedBooks),
-      improvements: filterByBooks(catalogs.improvements, selectedBooks),
-      specialMaterials: filterByBooks(catalogs.specialMaterials, selectedBooks),
-      spells: filterByBooks(catalogs.spells, selectedBooks)
+      items: filterCatalogByBooks(catalogs.items, selectedBooks),
+      improvements: filterCatalogByBooks(catalogs.improvements, selectedBooks),
+      specialMaterials: filterCatalogByBooks(catalogs.specialMaterials, selectedBooks),
+      spells: filterCatalogByBooks(catalogs.spells, selectedBooks)
     }),
     [catalogs, selectedBooks]
   );

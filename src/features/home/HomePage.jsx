@@ -1,17 +1,17 @@
 import { BookOpen, Play, ScrollText } from "lucide-react";
 import { Button } from "../../shared/ui/Button.jsx";
-import { filterByBooks } from "../../shared/lib/catalogFilters.js";
+import { filterCatalogByBooks } from "../../shared/lib/catalogFilters.js";
 import "./HomePage.css";
 
 export function HomePage({ appContext, onStart }) {
   const { books, catalogs, selectedBooks, setSelectedBooks } = appContext;
   const counts = {
-    raças: filterByBooks(catalogs.races, selectedBooks).length,
-    classes: filterByBooks(catalogs.classes, selectedBooks).length,
-    origens: filterByBooks(catalogs.origins, selectedBooks).length,
-    poderes: filterByBooks(catalogs.powers, selectedBooks).length,
-    itens: filterByBooks(catalogs.items, selectedBooks).length,
-    magias: filterByBooks(catalogs.spells, selectedBooks).length
+    "raças": filterCatalogByBooks(catalogs.races, selectedBooks).length,
+    classes: filterCatalogByBooks(catalogs.classes, selectedBooks).length,
+    origens: filterCatalogByBooks(catalogs.origins, selectedBooks).length,
+    poderes: filterCatalogByBooks(catalogs.powers, selectedBooks).length,
+    itens: filterCatalogByBooks(catalogs.items, selectedBooks).length,
+    magias: filterCatalogByBooks(catalogs.spells, selectedBooks).length
   };
 
   function toggleBook(bookId) {
@@ -40,9 +40,9 @@ export function HomePage({ appContext, onStart }) {
       <div className="page-frame home-grid">
         <section className="home-main">
           <div>
-            <h1 className="home-title">Escolha os livros da criação</h1>
+            <h1 className="home-title">Escolha os livros da criaÃ§Ã£o</h1>
             <p className="section-subtitle">
-              Os catálogos do criador serão filtrados por essa seleção.
+              Os catÃ¡logos do criador serÃ£o filtrados por essa seleÃ§Ã£o.
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export function HomePage({ appContext, onStart }) {
         <aside className="home-side">
           <div className="summary-heading">
             <ScrollText size={18} />
-            <h2>Dados disponíveis</h2>
+            <h2>Dados disponÃ­veis</h2>
           </div>
           <div className="summary-grid">
             {Object.entries(counts).map(([label, count]) => (
