@@ -49,6 +49,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const oficiosSelecionados = getSelectedOficios(escolhasClasse, escolhasOrigem);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
+  const bonusPericiasItens = coletarBonusPericiasMelhorias(draft, catalogs);
 
   const pericias = PERICIAS.flatMap((pericia) => {
     const treinada =
@@ -63,9 +64,10 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
     const atributoValor = Number(attrs[pericia.atributo] ?? 0);
     const racial = Number(bonusRacial[pericia.id] ?? 0);
     const tamanho = pericia.id === "furtividade" ? bonusTamanhoFurtividade : 0;
-    const bonusDiversos = racial + tamanho;
-    const bonusTreino = calcularBonusTreinamentoPericia(nivel, treinada);
     const bloqueada = Boolean(pericia.requerTreinamento && !treinada);
+    const bonusItem = bloqueada ? 0 : Number(bonusPericiasItens[pericia.id] ?? 0);
+    const bonusDiversos = racial + tamanho + bonusItem;
+    const bonusTreino = calcularBonusTreinamentoPericia(nivel, treinada);
     const total = bloqueada
       ? bonusDiversos
       : calcularTotalPericia({ atributo: atributoValor, nivel, treinada, bonusDiversos });
@@ -77,6 +79,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
       atributoValor,
       bonusNivel: bonusNivelPericia,
       bonusTreino,
+      bonusItem,
       bonusDiversos,
       bonusGeral: bonusTreino + bonusDiversos,
       total
@@ -92,6 +95,28 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   });
 
   return { pericias, bonusNivelPericia };
+}
+
+function coletarBonusPericiasMelhorias(draft, catalogs) {
+  const bonus = {};
+  getSelectedPrototypeImprovementIds(draft).forEach((melhoriaId) => {
+    const melhoria = catalogs.improvements?.find((item) => item.id === melhoriaId);
+    (melhoria?.efeitos ?? []).forEach((efeito) => {
+      if (efeito.tipo === "bonus_pericia" && efeito.periciaId) {
+        bonus[efeito.periciaId] = Number(bonus[efeito.periciaId] ?? 0) + Number(efeito.bonus ?? 0);
+      }
+      if (efeito.tipo === "penalidade_pericia" && efeito.periciaId) {
+        bonus[efeito.periciaId] = Number(bonus[efeito.periciaId] ?? 0) + Number(efeito.penalidade ?? 0);
+      }
+    });
+  });
+  return bonus;
+}
+
+function getSelectedPrototypeImprovementIds(draft) {
+  const itemSuperior = draft.escolhas?.classe?.prototipo?.itemSuperior ?? {};
+  if (Array.isArray(itemSuperior.melhoriaIds)) return itemSuperior.melhoriaIds.filter(Boolean);
+  return itemSuperior.melhoriaId ? [itemSuperior.melhoriaId] : [];
 }
 
 function getPericiasOrigemSelecionadas(escolhasOrigem = {}) {
