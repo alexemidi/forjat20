@@ -37,6 +37,13 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
   const habilidadesAtivas = (selectedClass?.habilidades ?? [])
     .filter((habilidade) => Number(habilidade.nivel ?? 1) <= nivel)
     .sort((a, b) => Number(a.nivel ?? 1) - Number(b.nivel ?? 1) || String(a.nome).localeCompare(String(b.nome)));
+  const misticoAffinityAbility =
+    selectedClass?.id === "mistico"
+      ? habilidadesAtivas.find((ability) => ability.id === "mistico_afinidade")
+      : null;
+  const visibleAbilities = misticoAffinityAbility
+    ? habilidadesAtivas.filter((ability) => ability.id !== "mistico_afinidade")
+    : habilidadesAtivas;
 
   useEffect(() => {
     if (shouldShowIntSkills && !wasShowingIntSkillsRef.current) {
@@ -226,6 +233,28 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
             </section>
           ) : null}
 
+          {misticoAffinityAbility ? (
+            <section className="builder-section">
+              <div className="builder-section__header">
+                <h2>Escolhas de classe</h2>
+                <span className="pill">1</span>
+              </div>
+              <article className="class-ability">
+                <div className="class-ability__header">
+                  <strong>{misticoAffinityAbility.nome}</strong>
+                  <span>Nivel {misticoAffinityAbility.nivel ?? 1}</span>
+                </div>
+                {misticoAffinityAbility.descricao ? <p>{misticoAffinityAbility.descricao}</p> : <p className="muted">Sem descricao registrada.</p>}
+                <ClassAbilityChoices
+                  ability={misticoAffinityAbility}
+                  classChoices={classChoices}
+                  nivel={nivel}
+                  updateDraft={updateDraft}
+                />
+              </article>
+            </section>
+          ) : null}
+
           <section className="builder-section">
             <div className="builder-section__header">
               <h2>Pericias da classe</h2>
@@ -376,10 +405,10 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
           <section className="builder-section">
             <div className="builder-section__header">
               <h2>Habilidades ate o nivel {nivel}</h2>
-              <span className="pill">{habilidadesAtivas.length}</span>
+              <span className="pill">{visibleAbilities.length}</span>
             </div>
             <div className="class-ability-list">
-              {habilidadesAtivas.map((ability) => (
+              {visibleAbilities.map((ability) => (
                 <article className="class-ability" key={ability.id ?? `${ability.nivel}-${ability.nome}`}>
                   <div className="class-ability__header">
                     <strong>{ability.nome}</strong>
@@ -622,7 +651,11 @@ function ClassAbilityChoices({ ability, classChoices, nivel, updateDraft }) {
 
 function shouldRenderGenericClassChoices(ability) {
   if (!ability?.escolhas?.length) return false;
-  if (ability.id === "arcanista_caminho_do_arcanista" || ability.id === "inventor_prototipo") return false;
+  if (
+    ability.id === "arcanista_caminho_do_arcanista" ||
+    ability.id === "inventor_prototipo" ||
+    ability.id === "mistico_manifestacoes_elementais"
+  ) return false;
   if (String(ability.id ?? "").includes("magias")) return false;
   return ability.escolhas.some((choice) => getClassChoiceOptions(choice, 20).length && !isDeferredClassChoice(choice));
 }
@@ -1761,11 +1794,14 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
     if (entry.id && entry.id !== "oficio") fixedDirect.add(entry.id);
   }
 
-  const selectedRaceSkills = sanitizeSelection(classChoices.periciasRaca, PERICIAS);
-  const selectedClassSkills = sanitizeSelection(classChoices.periciasClasse, classe?.caracteristicas?.pericias?.escolhas?.opcoes ?? []);
-  const selectedIntSkills = sanitizeSelection(classChoices.periciasInteligencia, PERICIAS);
-  const selectedOficios = getSelectedOficios(classChoices);
   const classChoiceGrantedSkills = getClassChoiceGrantedSkills(classe, classChoices);
+  const selectedRaceSkills = sanitizeSelection(classChoices.periciasRaca, PERICIAS)
+    .filter((periciaId) => !classChoiceGrantedSkills.includes(getPericiaBaseId(periciaId)));
+  const selectedClassSkills = sanitizeSelection(classChoices.periciasClasse, classe?.caracteristicas?.pericias?.escolhas?.opcoes ?? [])
+    .filter((periciaId) => !classChoiceGrantedSkills.includes(getPericiaBaseId(periciaId)));
+  const selectedIntSkills = sanitizeSelection(classChoices.periciasInteligencia, PERICIAS)
+    .filter((periciaId) => !classChoiceGrantedSkills.includes(getPericiaBaseId(periciaId)));
+  const selectedOficios = getSelectedOficios(classChoices);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
 
@@ -1774,9 +1810,9 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
   const raceChoiceLimit = race ? coletarQuantidadePericiasRaciaisEscolhiveis(race, raceChoices) : 0;
   const classChoiceLimit = classe?.caracteristicas?.pericias?.escolhas?.quantidade ?? 0;
   const intChoiceLimit = Math.max(0, Number(attrs.int ?? 0));
-  const blockedForClassChoices = new Set([...fixedDirect, ...fixedChoices, ...treinadasRaciais]);
-  const blockedForIntChoices = new Set([...fixedDirect, ...fixedChoices, ...selectedClassSkills.map(getPericiaBaseId), ...treinadasRaciais]);
-  const blockedForRaceChoices = new Set([...fixedDirect, ...fixedChoices, ...selectedClassSkills.map(getPericiaBaseId), ...selectedIntSkills.map(getPericiaBaseId), ...treinadasRaciais]);
+  const blockedForClassChoices = new Set([...fixedDirect, ...fixedChoices, ...classChoiceGrantedSkills, ...treinadasRaciais]);
+  const blockedForIntChoices = new Set([...fixedDirect, ...fixedChoices, ...classChoiceGrantedSkills, ...selectedClassSkills.map(getPericiaBaseId), ...treinadasRaciais]);
+  const blockedForRaceChoices = new Set([...fixedDirect, ...fixedChoices, ...classChoiceGrantedSkills, ...selectedClassSkills.map(getPericiaBaseId), ...selectedIntSkills.map(getPericiaBaseId), ...treinadasRaciais]);
   const fixedChoicesComplete = fixedChoiceEntries.every((_, index) => Boolean(classChoices.periciasFixas?.[`fixa_${index}`]));
   const classChoicesComplete = fixedChoicesComplete && selectedClassSkills.length >= classChoiceLimit;
   const classChoiceOptions = filterSkillOptions(classe?.caracteristicas?.pericias?.escolhas?.opcoes ?? [], blockedForClassChoices, selectedClassSkills, selectedOficios);
