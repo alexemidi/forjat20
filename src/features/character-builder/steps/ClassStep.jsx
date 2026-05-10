@@ -483,72 +483,64 @@ function ArcanistPathChoice({ ability, catalogs, classChoices, attrs, nivel, upd
 
   return (
     <div className="class-choice-panel">
-      <div className="builder-section__header">
-        <div>
-          <h3>Caminho do Arcanista</h3>
-          <p>Escolha permanente. Define o atributo-chave das magias.</p>
-        </div>
-        {magicCd ? <span className="pill">CD {magicCd}</span> : null}
-      </div>
-      <div className="class-power-grid">
-        {caminhoOptions.map((option) => (
-          <ChoiceCard
-            active={choices.caminhoId === option.id}
-            key={option.id}
-            onClick={() => selectPath(option.id)}
-            title={option.nome}
-            description={option.descricao}
-          />
-        ))}
-      </div>
+      <SimpleSegment
+        label="1. Caminho do Arcanista"
+        value={choices.caminhoId ?? ""}
+        options={caminhoOptions.map((option) => option.id)}
+        labels={Object.fromEntries(caminhoOptions.map((option) => [option.id, option.nome]))}
+        onChange={selectPath}
+      />
 
       {selectedPath ? (
-        <p className="class-prototype-result">
-          Atributo-chave: <strong>{magicAttr === "car" ? "Carisma" : "Inteligência"}</strong>. CD de magia: <strong>{magicCd}</strong>.
-        </p>
+        <ChoiceDescription title={selectedPath.nome}>
+          {selectedPath.descricao}
+          <p className="choice-description__subtext">
+            Atributo-chave: <strong>{magicAttr === "car" ? "Carisma" : "Inteligência"}</strong>. CD de magia: <strong>{magicCd}</strong>.
+          </p>
+        </ChoiceDescription>
       ) : null}
 
       {lineageOptions.length ? (
-        <div className="class-choice-subpanel">
-          <div className="builder-section__header">
-            <div>
-              <h3>Linhagem Sobrenatural</h3>
-              <p>O feiticeiro recebe a herança básica da linhagem escolhida.</p>
-            </div>
-          </div>
-          <div className="class-power-grid">
-            {lineageOptions.map((option) => (
-              <ChoiceCard
-                active={choices.linhagemId === option.id}
-                key={option.id}
-                onClick={() => selectLineage(option.id)}
-                title={option.nome}
-                description={option.estagios?.find((stage) => stage.id === "basica")?.descricao ?? option.descricao}
-              />
-            ))}
-          </div>
-        </div>
+        <SimpleSegment
+          label="2. Linhagem Sobrenatural"
+          value={choices.linhagemId ?? ""}
+          options={lineageOptions.map((option) => option.id)}
+          labels={Object.fromEntries(lineageOptions.map((option) => [option.id, option.nome]))}
+          onChange={selectLineage}
+        />
+      ) : null}
+
+      {selectedLineage ? (
+        <ChoiceDescription title={selectedLineage.nome}>
+          {selectedLineage.estagios?.find((stage) => stage.id === "basica")?.descricao ?? selectedLineage.descricao}
+        </ChoiceDescription>
       ) : null}
 
       {selectedLineage?.id === "linhagem_draconica" ? (
-        <ArcanistSmallChoice
-          label="Tipo de dano dracônico"
+        <SimpleSegment
+          label="3. Tipo de dano dracônico"
           options={[
-            ["acido", "Ácido"],
-            ["eletricidade", "Eletricidade"],
-            ["fogo", "Fogo"],
-            ["frio", "Frio"]
+            "acido",
+            "eletricidade",
+            "fogo",
+            "frio"
           ]}
+          labels={{
+            acido: "Ácido",
+            eletricidade: "Eletricidade",
+            fogo: "Fogo",
+            frio: "Frio"
+          }}
           value={choices.tipoDanoDraconico}
           onChange={(value) => updateDraft("escolhas.classe.arcanista.tipoDanoDraconico", value)}
         />
       ) : null}
 
       {selectedLineage?.id === "linhagem_abencoada" ? (
-        <div className="class-choice-subpanel">
+        <div className="choice-panel">
           <SelectInput
             id="arcanist-blessed-god"
-            label="Deus maior da linhagem abençoada"
+            label="3. Deus maior da linhagem abençoada"
             onChange={(event) => updateDraft("escolhas.classe.arcanista.deusMaiorId", event.target.value)}
             value={choices.deusMaiorId ?? ""}
           >
@@ -568,42 +560,31 @@ function ArcanistPathChoice({ ability, catalogs, classChoices, attrs, nivel, upd
   );
 }
 
-function ChoiceCard({ active, title, description, onClick }) {
+function SimpleSegment({ label, value, options, labels = {}, onChange }) {
   return (
-    <article className={`class-power-card${active ? " class-power-card--active" : ""}`}>
-      <div className="class-power-card__header">
-        <strong>{title}</strong>
-      </div>
-      <p>{description}</p>
-      <div className="class-power-card__actions">
-        <button onClick={onClick} type="button">
-          {active ? "Selecionado" : "Escolher"}
-        </button>
-      </div>
-    </article>
-  );
-}
-
-function ArcanistSmallChoice({ label, options, value, onChange }) {
-  return (
-    <div className="class-choice-subpanel">
-      <div className="builder-section__header">
-        <div>
-          <h3>{label}</h3>
-        </div>
-      </div>
+    <div className="choice-panel">
+      <label className="choice-label">{label}</label>
       <div className="choice-button-grid">
-        {options.map(([optionValue, optionLabel]) => (
+        {options.map((option) => (
           <button
-            className={`choice-button${value === optionValue ? " choice-button--active" : ""}`}
-            key={optionValue}
-            onClick={() => onChange(optionValue)}
+            className={`choice-button${value === option ? " choice-button--active" : ""}`}
+            key={option}
+            onClick={() => onChange(option)}
             type="button"
           >
-            {optionLabel}
+            {labels[option] ?? option}
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function ChoiceDescription({ title, children }) {
+  return (
+    <div className="choice-description">
+      <strong>{title}</strong>
+      <div>{children}</div>
     </div>
   );
 }
