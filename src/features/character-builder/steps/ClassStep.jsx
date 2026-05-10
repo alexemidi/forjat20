@@ -653,8 +653,7 @@ function shouldRenderGenericClassChoices(ability) {
   if (!ability?.escolhas?.length) return false;
   if (
     ability.id === "arcanista_caminho_do_arcanista" ||
-    ability.id === "inventor_prototipo" ||
-    ability.id === "mistico_manifestacoes_elementais"
+    ability.id === "inventor_prototipo"
   ) return false;
   if (String(ability.id ?? "").includes("magias")) return false;
   return ability.escolhas.some((choice) => getClassChoiceOptions(choice, 20).length && !isDeferredClassChoice(choice));
