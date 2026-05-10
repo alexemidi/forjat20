@@ -173,6 +173,9 @@ export function DebugPanel({ draft, catalogs }) {
   const bonusAtaqueRaciais = race ? coletarBonusAtaqueRaciais(race, raceChoices) : [];
   const bonusDanoRaciais = race ? coletarBonusDanoRaciais(race, raceChoices) : [];
   const mochila = montarMochilaDebug(draft, catalogs, origem, pericias);
+  const autoEquipamentoArma = getAutoEquippedWeaponSlot(mochila, empunhadura);
+  const armaAutoDireita = autoEquipamentoArma?.mao === "maoDireita" || autoEquipamentoArma?.duasMaos ? autoEquipamentoArma.arma : null;
+  const armaAutoEsquerda = autoEquipamentoArma?.mao === "maoEsquerda" || autoEquipamentoArma?.duasMaos ? autoEquipamentoArma.arma : null;
 
   // Redução de dano (structured)
   const rds = race ? coletarRDRaciais(race, raceChoices) : [];
@@ -238,13 +241,13 @@ export function DebugPanel({ draft, catalogs }) {
           <DbgRow label="Manobra" value={signed(manobra)} sub={`Luta ${signed(lutaBonus)}${bonusTamanhoManobra !== 0 ? ` + tam ${signed(bonusTamanhoManobra)}` : ""}`} />
           <DbgRow
             label="Mão Direita"
-            value={empunhadura.maoDireita.itemInventarioId ? "Ocupada" : "Livre"}
-            sub={describeHand(empunhadura.maoDireita, draft, catalogs, danoDesarmado)}
+            value={empunhadura.maoDireita.itemInventarioId || armaAutoDireita ? "Ocupada" : "Livre"}
+            sub={empunhadura.maoDireita.itemInventarioId ? describeHand(empunhadura.maoDireita, draft, catalogs, danoDesarmado) : describeAutoHand(armaAutoDireita, danoDesarmado)}
           />
           <DbgRow
             label="Mão Esquerda"
-            value={empunhadura.maoEsquerda.itemInventarioId ? "Ocupada" : "Livre"}
-            sub={describeHand(empunhadura.maoEsquerda, draft, catalogs, danoDesarmado)}
+            value={empunhadura.maoEsquerda.itemInventarioId || armaAutoEsquerda ? "Ocupada" : "Livre"}
+            sub={empunhadura.maoEsquerda.itemInventarioId ? describeHand(empunhadura.maoEsquerda, draft, catalogs, danoDesarmado) : describeAutoHand(armaAutoEsquerda, danoDesarmado)}
           />
           {empunhadura.usandoDuasMaos ? (
             <DbgRow
@@ -267,21 +270,9 @@ export function DebugPanel({ draft, catalogs }) {
         </DbgSection>
 
         <DbgSection title="Mochila">
-          <div className="dbg__inventory-table">
-            <div className="dbg__inventory-head">
-              <span>Item</span><span>Qtd</span><span>Espa\u00e7os</span>
-            </div>
-            {mochila.itens.map((item) => (
-              <div className="dbg__inventory-row" key={item.key}>
-                <span>{item.nome}</span>
-                <span>{item.quantidade}</span>
-                <span>{formatInventorySpaces(item.espacosTotal)}</span>
-              </div>
-            ))}
-            <div className="dbg__inventory-total">
-              <span>Total</span><span>{mochila.quantidadeTotal}</span><span>{formatInventorySpaces(mochila.espacosTotal)}</span>
-            </div>
-          </div>
+          <DbgInventoryWeapons items={mochila.armas} pericias={pericias} catalogs={catalogs} />
+          <DbgInventoryDefenses items={mochila.defesas} catalogs={catalogs} />
+          <DbgInventoryGeneral items={mochila.gerais} total={mochila} />
         </DbgSection>
 
         <DbgSection title="Proficiências">
@@ -386,13 +377,13 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
   const selectedOriginItems = draft.escolhas?.origem?.itens ?? {};
   const defaultOficioId = pericias.find((pericia) => String(pericia.id).startsWith("oficio:"))?.id?.slice("oficio:".length) ?? "";
 
-  function addItem(itemId, quantidade = 1, nomeOverride = "") {
+  function addItem(itemId, quantidade = 1, nomeOverride = "", melhoriaIds = []) {
     if (!itemId) return;
     const catalogItem = catalogs.items.find((item) => item.id === itemId);
     const nome = nomeOverride || catalogItem?.nome || itemId;
     const espacosUnitarios = Number(catalogItem?.espacos ?? 0);
     const key = `${itemId}:${nome}`;
-    const current = entries.get(key) ?? { key, nome, quantidade: 0, espacosTotal: 0 };
+    const current = entries.get(key) ?? { key, itemId, catalogItem, nome, melhoriaIds, quantidade: 0, espacosTotal: 0 };
     current.quantidade += quantidade;
     current.espacosTotal += espacosUnitarios * quantidade;
     entries.set(key, current);
@@ -436,15 +427,21 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
       .filter(Boolean);
     const item = catalogs.items.find((catalogItem) => catalogItem.id === prototipo.itemSuperior.itemId);
     const suffix = improvementNames.length ? ` (${improvementNames.join(", ")})` : "";
-    addItem(prototipo.itemSuperior.itemId, 1, item ? `${item.nome}${suffix}` : "");
+    addItem(prototipo.itemSuperior.itemId, 1, item ? `${item.nome}${suffix}` : "", selectedImprovementIds);
   }
   (prototipo.alquimicos ?? []).forEach((itemId) => addItem(itemId));
   (draft.escolhas?.equipamentoInicialIds ?? []).forEach((itemId) => addItem(itemId));
   (draft.inventario?.itens ?? []).forEach((item) => addItem(item.itemId, Number(item.quantidade ?? 1) || 1));
 
   const itens = [...entries.values()].sort((a, b) => a.nome.localeCompare(b.nome));
+  const armas = itens.filter((item) => item.catalogItem?.tipo === "arma");
+  const defesas = itens.filter((item) => item.catalogItem?.tipo === "armadura" || item.catalogItem?.tipo === "escudo");
+  const gerais = itens.filter((item) => item.catalogItem?.tipo !== "arma" && item.catalogItem?.tipo !== "armadura" && item.catalogItem?.tipo !== "escudo");
   return {
     itens,
+    armas,
+    defesas,
+    gerais,
     quantidadeTotal: itens.reduce((total, item) => total + item.quantidade, 0),
     espacosTotal: itens.reduce((total, item) => total + item.espacosTotal, 0)
   };
@@ -484,6 +481,81 @@ function DbgSection({ title, children }) {
   );
 }
 
+function DbgInventoryWeapons({ items, pericias, catalogs }) {
+  if (!items.length) return null;
+  const lutaTotal = pericias.find((pericia) => pericia.id === "luta")?.total ?? 0;
+  return (
+    <div className="dbg__inventory-block">
+      <div className="dbg__inventory-subtitle">Armas</div>
+      <div className="dbg__inventory-table dbg__inventory-table--weapons">
+        <div className="dbg__inventory-head">
+          <span>Nome</span><span>TA</span><span>Dn</span><span>Crt</span><span>Esp</span>
+        </div>
+        {items.map((item) => {
+          const mods = getDebugImprovementModifiers(item, catalogs);
+          return (
+            <div className="dbg__inventory-row" key={item.key}>
+              <span>{formatInventoryName(item)}</span>
+              <span>{plainNumber(lutaTotal + mods.ataque)}</span>
+              <span>{formatDebugWeaponDamage(item.catalogItem, mods.dano)}</span>
+              <span>{formatDebugWeaponCritical(item.catalogItem, mods)}</span>
+              <span>{formatInventorySpaces(item.espacosTotal)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DbgInventoryDefenses({ items, catalogs }) {
+  if (!items.length) return null;
+  return (
+    <div className="dbg__inventory-block">
+      <div className="dbg__inventory-subtitle">Armaduras e Escudos</div>
+      <div className="dbg__inventory-table dbg__inventory-table--defenses">
+        <div className="dbg__inventory-head">
+          <span>Nome</span><span>Def</span><span>Pen</span><span>Esp</span>
+        </div>
+        {items.map((item) => {
+          const mods = getDebugImprovementModifiers(item, catalogs);
+          return (
+            <div className="dbg__inventory-row" key={item.key}>
+              <span>{formatInventoryName(item)}</span>
+              <span>{formatBonus(getDebugDefenseValue(item.catalogItem) + mods.defesa)}</span>
+              <span>{formatNumberOrDash(getDebugArmorPenalty(item.catalogItem) + mods.penalidade)}</span>
+              <span>{formatInventorySpaces(item.espacosTotal)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DbgInventoryGeneral({ items, total }) {
+  return (
+    <div className="dbg__inventory-block">
+      <div className="dbg__inventory-subtitle">Itens Gerais</div>
+      <div className="dbg__inventory-table dbg__inventory-table--general">
+        <div className="dbg__inventory-head">
+          <span>Nome</span><span>Qtd</span><span>Esp</span>
+        </div>
+        {items.map((item) => (
+          <div className="dbg__inventory-row" key={item.key}>
+            <span>{item.nome}</span>
+            <span>{item.quantidade}</span>
+            <span>{formatInventorySpaces(item.espacosTotal)}</span>
+          </div>
+        ))}
+        <div className="dbg__inventory-total">
+          <span>Total</span><span>{total.quantidadeTotal}</span><span>{formatInventorySpaces(total.espacosTotal)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DbgRow({ label, value, sub }) {
   return (
     <div className="dbg__row">
@@ -499,6 +571,99 @@ function DbgRow({ label, value, sub }) {
 function describeHand(mao, draft, catalogs, danoDesarmado) {
   if (!mao?.itemInventarioId) return `Ataque desarmado ${danoDesarmado}, impacto, não letal`;
   return `Item: ${resolveInventoryItemName(mao.itemInventarioId, draft, catalogs)}`;
+}
+
+function describeAutoHand(armaAutoEquipada, danoDesarmado) {
+  if (!armaAutoEquipada) return `Ataque desarmado ${danoDesarmado}, impacto, não letal`;
+  return `Item: ${armaAutoEquipada.nome}`;
+}
+
+function getAutoEquippedWeaponSlot(mochila, empunhadura) {
+  if (empunhadura.usandoDuasMaos) return null;
+  const arma = mochila.armas[0];
+  if (!arma) return null;
+
+  const direitaLivre = !empunhadura.maoDireita.itemInventarioId;
+  const esquerdaLivre = !empunhadura.maoEsquerda.itemInventarioId;
+  const duasMaos = getDebugWeaponHands(arma.catalogItem) === 2;
+
+  if (duasMaos) return direitaLivre && esquerdaLivre ? { arma, duasMaos: true } : null;
+  if (direitaLivre) return { arma, mao: "maoDireita" };
+  if (esquerdaLivre) return { arma, mao: "maoEsquerda" };
+  return null;
+}
+
+function getDebugWeaponHands(item) {
+  return item?.arma?.empunhaduraId === "duas_maos" || item?.equipamento?.slotsPermitidos?.includes("duas_maos") ? 2 : 1;
+}
+
+function formatInventoryName(item) {
+  return item.quantidade > 1 ? `${item.nome} x${item.quantidade}` : item.nome;
+}
+
+function getDebugImprovementModifiers(item, catalogs) {
+  const modifiers = {
+    ataque: 0,
+    dano: 0,
+    defesa: 0,
+    penalidade: 0,
+    margem: 0,
+    multiplicador: 0
+  };
+  getDebugImprovements(item, catalogs).forEach((improvement) => {
+    (improvement.efeitos ?? []).forEach((effect) => {
+      if (effect.tipo === "bonus_ataque_arma") modifiers.ataque += Number(effect.bonus ?? 0);
+      if (effect.tipo === "bonus_dano_arma") modifiers.dano += Number(effect.bonus ?? 0);
+      if (effect.tipo === "bonus_defesa_item") modifiers.defesa += Number(effect.bonus ?? 0);
+      if (effect.tipo === "reduzir_penalidade_armadura_item") modifiers.penalidade += Number(effect.valor ?? 0);
+      if (effect.tipo === "aumentar_penalidade_armadura_item") modifiers.penalidade -= Number(effect.valor ?? 0);
+      if (effect.tipo === "bonus_margem_ameaca") modifiers.margem += Number(effect.bonus ?? 0);
+      if (effect.tipo === "bonus_multiplicador_critico") modifiers.multiplicador += Number(effect.bonus ?? 0);
+    });
+  });
+  return modifiers;
+}
+
+function getDebugImprovements(item, catalogs) {
+  const ids = item.melhoriaIds ?? [];
+  return ids.map((id) => catalogs.improvements.find((improvement) => improvement.id === id)).filter(Boolean);
+}
+
+function formatDebugWeaponDamage(item, bonusDano) {
+  const damage = item?.arma?.dano?.texto ?? item?.arma?.dano?.principal ?? "—";
+  return bonusDano ? `${damage}${bonusDano > 0 ? "+" : ""}${bonusDano}` : damage;
+}
+
+function formatDebugWeaponCritical(item, modifiers) {
+  if (item?.arma?.critico?.texto && !modifiers.margem && !modifiers.multiplicador) return item.arma.critico.texto;
+  const baseMargem = Number(item?.arma?.critico?.margem ?? 20);
+  const baseMultiplicador = Number(item?.arma?.critico?.multiplicador ?? 2);
+  const margem = Math.max(1, baseMargem - modifiers.margem);
+  const multiplicador = baseMultiplicador + modifiers.multiplicador;
+  return margem !== 20 ? `${margem}/x${multiplicador}` : `x${multiplicador}`;
+}
+
+function getDebugDefenseValue(item) {
+  if (item?.tipo === "armadura") return Number(item.armadura?.defesa ?? 0);
+  if (item?.tipo === "escudo") return Number(item.escudo?.bonusDefesa ?? 0);
+  return 0;
+}
+
+function getDebugArmorPenalty(item) {
+  if (item?.tipo === "armadura") return Number(item.armadura?.penalidade ?? 0);
+  if (item?.tipo === "escudo") return Number(item.escudo?.penalidade ?? 0);
+  return 0;
+}
+
+function formatBonus(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "—";
+  return number > 0 ? `+${number}` : String(number);
+}
+
+function formatNumberOrDash(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? String(number) : "—";
 }
 
 function resolveInventoryItemName(itemInventarioId, draft, catalogs) {
