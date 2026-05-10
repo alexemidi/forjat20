@@ -464,7 +464,7 @@ function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
   const [openImprovementShop, setOpenImprovementShop] = useState(false);
   const choice = classChoices.prototipo ?? {};
   const selectedSuperior = choice.itemSuperior ?? {};
-  const shopItems = getSuperiorPrototypeOptions(catalogs).map((option) => option.item);
+  const shopItems = getPrototypeShopItems(catalogs.items);
   const selectedItem = shopItems.find((item) => item.id === selectedSuperior.itemId);
   const improvementOptions = selectedItem ? getCompatiblePrototypeImprovements(selectedItem, catalogs.improvements) : [];
   const selectedImprovementIds = getPrototypeImprovementIds(selectedSuperior)
