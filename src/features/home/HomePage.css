@@ -30,6 +30,32 @@
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
+.book-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.book-select-all {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #7a2f23;
+  border-radius: 8px;
+  color: #64241b;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 700;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.book-select-all:disabled {
+  background: #f1e4db;
+  cursor: default;
+  opacity: 0.72;
+}
+
 .book-option {
   align-items: center;
   background: #ffffff;

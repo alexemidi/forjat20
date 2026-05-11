@@ -8,6 +8,10 @@ const LIVROS = [
     nome: "Heróis de Arton"
   },
   {
+    id: "atlas_de_arton",
+    nome: "Atlas de Arton"
+  },
+  {
     id: "ameacas_de_arton",
     nome: "Ameaças de Arton"
   },

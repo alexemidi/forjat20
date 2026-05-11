@@ -1,10 +1,12 @@
-import { BookOpen, Play, ScrollText } from "lucide-react";
+import { BookOpen, CheckSquare, Play, ScrollText } from "lucide-react";
 import { Button } from "../../shared/ui/Button.jsx";
 import { filterCatalogByBooks } from "../../shared/lib/catalogFilters.js";
 import "./HomePage.css";
 
 export function HomePage({ appContext, onStart }) {
   const { books, catalogs, selectedBooks, setSelectedBooks } = appContext;
+  const allBookIds = books.map((book) => book.id);
+  const allBooksSelected = allBookIds.every((bookId) => selectedBooks.includes(bookId));
   const counts = {
     "raças": filterCatalogByBooks(catalogs.races, selectedBooks).length,
     classes: filterCatalogByBooks(catalogs.classes, selectedBooks).length,
@@ -22,6 +24,10 @@ export function HomePage({ appContext, onStart }) {
       }
       return [...current, bookId];
     });
+  }
+
+  function selectAllBooks() {
+    setSelectedBooks(allBookIds);
   }
 
   return (
@@ -44,6 +50,13 @@ export function HomePage({ appContext, onStart }) {
             <p className="section-subtitle">
               Os catÃ¡logos do criador serÃ£o filtrados por essa seleÃ§Ã£o.
             </p>
+          </div>
+
+          <div className="book-actions">
+            <button className="book-select-all" disabled={allBooksSelected} onClick={selectAllBooks} type="button">
+              <CheckSquare size={18} />
+              {allBooksSelected ? "Todos marcados" : "Marcar todos"}
+            </button>
           </div>
 
           <div className="book-grid">

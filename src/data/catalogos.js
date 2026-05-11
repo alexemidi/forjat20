@@ -3,6 +3,7 @@ import { cleanText } from "../shared/lib/text.js";
 export const books = [
   { id: "basico", nome: "Básico" },
   { id: "herois_de_arton", nome: "Heróis de Arton" },
+  { id: "atlas_de_arton", nome: "Atlas de Arton" },
   { id: "ameacas_de_arton", nome: "Ameaças de Arton" },
   { id: "deuses_de_arton", nome: "Deuses de Arton" },
   { id: "dragao_brasil", nome: "Dragão Brasil" }
