@@ -502,6 +502,15 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
         options: getArtistItemOptions(items)
       };
     }
+    const simpleOptions = getSimpleOriginItemOptions(itemText, items);
+    if (simpleOptions.length) {
+      return {
+        id: `item_${index}`,
+        nome: itemText,
+        descricao: "Escolha um dos itens recebidos.",
+        options: simpleOptions
+      };
+    }
     if (isCraftedItemChoice(itemText)) {
       const maxPrice = getCraftedItemPriceLimit(itemText);
       return {
@@ -529,6 +538,9 @@ function isOficioInstrumentChoice(itemText) {
 }
 
 function formatOriginItemName(entry, selectedValue, selectedItems = {}, defaultInstrumentOficioId = "") {
+  if (entry.options?.length && selectedValue) {
+    return entry.options.find((option) => option.id === selectedValue)?.nome ?? entry.nome;
+  }
   if (entry.kind === "instrumentos_oficio") {
     const oficioId = selectedValue || defaultInstrumentOficioId;
     if (oficioId) return `Instrumentos de Of\u00edcio (${getOficioLabel(oficioId).toLowerCase()})`;
@@ -567,6 +579,56 @@ function getArtistItemOptions(items) {
       .map((item) => ({ id: item.id, nome: item.nome })),
     ...musicalItems
   ].sort((a, b) => a.nome.localeCompare(b.nome));
+}
+
+function getSimpleOriginItemOptions(itemText, items) {
+  const normalized = normalizeText(itemText);
+  if (!normalized.includes(" ou ")) return [];
+
+  if (normalized.includes("arma simples ou marcial de ataque a distancia")) {
+    return items
+      .filter((item) => item.tipo === "arma" && ["simples", "marcial"].includes(item.categoriaId) && item.arma?.combateId === "a_distancia")
+      .map(toOriginItemOption);
+  }
+  if (normalized.includes("uma arma marcial ou exotica")) {
+    return items
+      .filter((item) => item.tipo === "arma" && ["marcial", "exotica"].includes(item.categoriaId))
+      .map(toOriginItemOption);
+  }
+  if (normalized.includes("instrumentos de oficio ou uma arma simples")) {
+    return [
+      { id: "instrumentos_de_oficio", nome: "Instrumentos de Ofício" },
+      ...items.filter((item) => item.tipo === "arma" && item.categoriaId === "simples").map(toOriginItemOption)
+    ];
+  }
+  if (normalized.includes("gazua ou instrumentos de oficio")) {
+    return [
+      ...items.filter((item) => item.id === "gazua").map(toOriginItemOption),
+      { id: "instrumentos_de_oficio", nome: "Instrumentos de Ofício" }
+    ];
+  }
+
+  return splitSimpleItemChoice(itemText)
+    .map((name) => findItemByName(items, name))
+    .filter(Boolean)
+    .map(toOriginItemOption);
+}
+
+function splitSimpleItemChoice(itemText) {
+  return String(itemText ?? "")
+    .replace(/\([^)]*\)/g, "")
+    .split(/\s+ou\s+/i)
+    .map((part) => part.replace(/^(um|uma|o|a)\s+/i, "").trim())
+    .filter(Boolean);
+}
+
+function findItemByName(items, name) {
+  const wanted = normalizeText(name);
+  return items.find((item) => normalizeText(item.nome) === wanted);
+}
+
+function toOriginItemOption(item) {
+  return { id: item.id, nome: item.nome };
 }
 
 function isCraftedItemChoice(itemText) {
