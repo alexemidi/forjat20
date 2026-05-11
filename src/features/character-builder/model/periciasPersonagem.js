@@ -48,7 +48,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const periciasEscolhidasClasse = new Set((escolhasClasse.periciasClasse ?? []).map(getPericiaBaseId));
   const periciasInteligenciaClasse = new Set((escolhasClasse.periciasInteligencia ?? []).map(getPericiaBaseId));
   const periciasOrigem = new Set(getPericiasOrigemSelecionadas(escolhasOrigem));
-  const periciasConcedidasEscolhasClasse = getClassChoiceGrantedSkills(classe, escolhasClasse);
+  const periciasConcedidasEscolhasClasse = getClassChoiceGrantedSkills(classe, escolhasClasse, nivel);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
   const treinadasAntesRegional = new Set([
     ...fixasClasse,
@@ -118,10 +118,11 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   return { pericias, bonusNivelPericia };
 }
 
-function getClassChoiceGrantedSkills(classe, classChoices = {}) {
+function getClassChoiceGrantedSkills(classe, classChoices = {}, nivel = 1) {
   const granted = [];
   if (classChoices.arcanista?.linhagemId === "linhagem_feerica") granted.push("enganacao");
-  collectClassAbilityChoiceOptions(classe, classChoices).forEach((option) => {
+  collectDirectClassAbilityGrantedSkills(classe, nivel).forEach((periciaId) => granted.push(periciaId));
+  collectClassAbilityChoiceOptions(classe, classChoices, nivel).forEach((option) => {
     if (option.pericia?.id) granted.push(option.pericia.id);
     if (isPericiaId(option.id)) granted.push(option.id);
     if (String(option.id ?? "").startsWith("oficio_")) granted.push("oficio");
@@ -129,19 +130,29 @@ function getClassChoiceGrantedSkills(classe, classChoices = {}) {
   return new Set(granted);
 }
 
-function collectClassAbilityChoiceOptions(classe, classChoices = {}) {
+function collectDirectClassAbilityGrantedSkills(classe, nivel = 1) {
+  return (classe?.habilidades ?? [])
+    .filter((ability) => Number(ability.nivel ?? 1) <= Number(nivel ?? 1))
+    .flatMap((ability) => ability.efeitos ?? [])
+    .filter((effect) => effect.tipo === "treinar_pericia" && effect.periciaId)
+    .map((effect) => effect.periciaId);
+}
+
+function collectClassAbilityChoiceOptions(classe, classChoices = {}, nivel = 1) {
   const selectedByAbility = classChoices.habilidades ?? {};
-  return (classe?.habilidades ?? []).flatMap((ability) => {
-    const selectedByChoice = selectedByAbility[ability.id] ?? {};
-    return (ability.escolhas ?? []).flatMap((choice) => {
-      const selected = selectedByChoice[choice.id];
-      const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
-      return selectedIds
-        .map((id) => (choice.opcoes ?? []).find((option) => getChoiceOptionId(option) === id))
-        .filter(Boolean)
-        .map(normalizeClassChoiceOption);
+  return (classe?.habilidades ?? [])
+    .filter((ability) => Number(ability.nivel ?? 1) <= Number(nivel ?? 1))
+    .flatMap((ability) => {
+      const selectedByChoice = selectedByAbility[ability.id] ?? {};
+      return (ability.escolhas ?? []).flatMap((choice) => {
+        const selected = selectedByChoice[choice.id];
+        const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
+        return selectedIds
+          .map((id) => (choice.opcoes ?? []).find((option) => getChoiceOptionId(option) === id))
+          .filter(Boolean)
+          .map(normalizeClassChoiceOption);
+      });
     });
-  });
 }
 
 function getChoiceOptionId(option) {

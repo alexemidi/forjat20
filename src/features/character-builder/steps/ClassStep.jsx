@@ -37,12 +37,9 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
   const habilidadesAtivas = (selectedClass?.habilidades ?? [])
     .filter((habilidade) => Number(habilidade.nivel ?? 1) <= nivel)
     .sort((a, b) => Number(a.nivel ?? 1) - Number(b.nivel ?? 1) || String(a.nome).localeCompare(String(b.nome)));
-  const misticoAffinityAbility =
-    selectedClass?.id === "mistico"
-      ? habilidadesAtivas.find((ability) => ability.id === "mistico_afinidade")
-      : null;
-  const visibleAbilities = misticoAffinityAbility
-    ? habilidadesAtivas.filter((ability) => ability.id !== "mistico_afinidade")
+  const preSkillAbilities = habilidadesAtivas.filter((ability) => shouldRenderBeforeClassSkills(ability));
+  const visibleAbilities = preSkillAbilities.length
+    ? habilidadesAtivas.filter((ability) => !preSkillAbilities.some((preSkillAbility) => preSkillAbility.id === ability.id))
     : habilidadesAtivas;
 
   useEffect(() => {
@@ -233,25 +230,31 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
             </section>
           ) : null}
 
-          {misticoAffinityAbility ? (
+          {preSkillAbilities.length ? (
             <section className="builder-section">
               <div className="builder-section__header">
                 <h2>Escolhas de classe</h2>
-                <span className="pill">1</span>
+                <span className="pill">{preSkillAbilities.length}</span>
               </div>
-              <article className="class-ability">
-                <div className="class-ability__header">
-                  <strong>{misticoAffinityAbility.nome}</strong>
-                  <span>Nivel {misticoAffinityAbility.nivel ?? 1}</span>
-                </div>
-                {misticoAffinityAbility.descricao ? <p>{misticoAffinityAbility.descricao}</p> : <p className="muted">Sem descricao registrada.</p>}
-                <ClassAbilityChoices
-                  ability={misticoAffinityAbility}
-                  classChoices={classChoices}
-                  nivel={nivel}
-                  updateDraft={updateDraft}
-                />
-              </article>
+              <div className="class-ability-list">
+                {preSkillAbilities.map((ability) => (
+                  <article className="class-ability" key={ability.id ?? `${ability.nivel}-${ability.nome}`}>
+                    <div className="class-ability__header">
+                      <strong>{ability.nome}</strong>
+                      <span>Nivel {ability.nivel ?? 1}</span>
+                    </div>
+                    {ability.descricao ? <p>{ability.descricao}</p> : <p className="muted">Sem descricao registrada.</p>}
+                    {shouldRenderGenericClassChoices(ability) ? (
+                      <ClassAbilityChoices
+                        ability={ability}
+                        classChoices={classChoices}
+                        nivel={nivel}
+                        updateDraft={updateDraft}
+                      />
+                    ) : null}
+                  </article>
+                ))}
+              </div>
             </section>
           ) : null}
 
@@ -660,6 +663,36 @@ function shouldRenderGenericClassChoices(ability) {
   return ability.escolhas.some((choice) => getClassChoiceOptions(choice, 20).length && !isDeferredClassChoice(choice));
 }
 
+function shouldRenderBeforeClassSkills(ability) {
+  if (!ability) return false;
+  return abilityGrantsSkill(ability) && (shouldRenderGenericClassChoices(ability) || abilityHasDirectSkillGrant(ability));
+}
+
+function abilityGrantsSkill(ability) {
+  return abilityHasDirectSkillGrant(ability) || abilityHasSkillChoice(ability);
+}
+
+function abilityHasDirectSkillGrant(ability) {
+  return (ability.efeitos ?? []).some((effect) =>
+    effect.tipo === "treinar_pericia" ||
+    effect.tipo === "treinar_pericia_escolha" ||
+    effect.tipo === "treinar_pericia_por_afinidade_secundaria"
+  );
+}
+
+function abilityHasSkillChoice(ability) {
+  return (ability.escolhas ?? []).some((choice) =>
+    getClassChoiceOptions(choice, 20).some((option) => isClassChoiceSkillOption(option))
+  );
+}
+
+function isClassChoiceSkillOption(option) {
+  if (!option) return false;
+  return Boolean(option.pericia?.id) ||
+    PERICIAS.some((pericia) => pericia.id === option.id) ||
+    String(option.id ?? "").startsWith("oficio_");
+}
+
 function isDeferredClassChoice(choice) {
   const id = String(choice.id ?? "");
   const name = String(choice.nome ?? "");
@@ -698,6 +731,7 @@ function formatClassChoiceDescription(option) {
   if (option.tipoDano) details.push(`Tipo de dano: ${formatClassChoiceLabel(option.tipoDano)}.`);
   if (option.escolaMagia) details.push(`Escola de magia: ${formatClassChoiceLabel(option.escolaMagia)}.`);
   if (option.pericia?.id) details.push(`Perícia: ${formatClassChoiceLabel(option.pericia.id)}.`);
+  if (String(option.id ?? "").startsWith("oficio_")) details.push(`Perícia: ${formatClassChoiceLabel(option.id)}.`);
   return details.length ? details.join(" ") : "Escolha registrada para esta habilidade.";
 }
 
@@ -712,6 +746,9 @@ function formatClassChoiceLabel(value) {
     transmutacao: "Transmutação"
   };
   if (directLabels[value]) return directLabels[value];
+  if (String(value ?? "").startsWith("oficio_")) {
+    return `Ofício (${formatClassChoiceLabel(String(value).slice("oficio_".length)).toLowerCase()})`;
+  }
   const normalized = String(value ?? "").replace(/^oficio_/, "Ofício ");
   return normalized
     .split("_")
@@ -1427,7 +1464,8 @@ function ClassGrantedSkills({ fixedEntries, classChoices, grantedSkillIds = [], 
   const [oficioAnchor, setOficioAnchor] = useState(null);
   const fixedSkillIds = new Set(fixedEntries.map((entry) => entry.id).filter(Boolean));
   const grantedSkills = [...new Set(grantedSkillIds)].filter((periciaId) => periciaId !== "oficio" && !fixedSkillIds.has(periciaId));
-  if (!fixedEntries.length && !grantedSkills.length) return null;
+  const grantedOficios = getClassAbilitySelectedOficios(classChoices).filter((oficioId) => !fixedSkillIds.has("oficio") || !selectedOficios.includes(oficioId));
+  if (!fixedEntries.length && !grantedSkills.length && !grantedOficios.length) return null;
 
   return (
     <div className="class-granted-skills">
@@ -1479,6 +1517,16 @@ function ClassGrantedSkills({ fixedEntries, classChoices, grantedSkillIds = [], 
             type="button"
           >
             {nomePericia(periciaId)}
+          </button>
+        ))}
+        {grantedOficios.map((oficioId) => (
+          <button
+            className="choice-button choice-button--active"
+            disabled
+            key={`granted-oficio-${oficioId}`}
+            type="button"
+          >
+            Ofício ({getOficioLabel(oficioId).toLowerCase()})
           </button>
         ))}
       </div>
@@ -1810,7 +1858,7 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
     if (entry.id && entry.id !== "oficio") fixedDirect.add(entry.id);
   }
 
-  const classChoiceGrantedSkills = getClassChoiceGrantedSkills(classe, classChoices);
+  const classChoiceGrantedSkills = getClassChoiceGrantedSkills(classe, classChoices, nivel);
   const selectedRaceSkills = sanitizeSelection(classChoices.periciasRaca, PERICIAS)
     .filter((periciaId) => !classChoiceGrantedSkills.includes(getPericiaBaseId(periciaId)));
   const selectedClassSkills = sanitizeSelection(classChoices.periciasClasse, classe?.caracteristicas?.pericias?.escolhas?.opcoes ?? [])
@@ -1872,10 +1920,11 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
   };
 }
 
-function getClassChoiceGrantedSkills(classe, classChoices = {}) {
+function getClassChoiceGrantedSkills(classe, classChoices = {}, nivel = 1) {
   const granted = [];
   if (classChoices.arcanista?.linhagemId === "linhagem_feerica") granted.push("enganacao");
-  collectClassAbilityChoiceOptions(classe, classChoices).forEach((option) => {
+  collectDirectClassAbilityGrantedSkills(classe, nivel).forEach((periciaId) => granted.push(periciaId));
+  collectClassAbilityChoiceOptions(classe, classChoices, nivel).forEach((option) => {
     if (option.pericia?.id) granted.push(option.pericia.id);
     if (PERICIAS.some((pericia) => pericia.id === option.id)) granted.push(option.id);
     if (String(option.id ?? "").startsWith("oficio_")) granted.push("oficio");
@@ -1883,19 +1932,29 @@ function getClassChoiceGrantedSkills(classe, classChoices = {}) {
   return granted;
 }
 
-function collectClassAbilityChoiceOptions(classe, classChoices = {}) {
+function collectDirectClassAbilityGrantedSkills(classe, nivel = 1) {
+  return (classe?.habilidades ?? [])
+    .filter((ability) => Number(ability.nivel ?? 1) <= Number(nivel ?? 1))
+    .flatMap((ability) => ability.efeitos ?? [])
+    .filter((effect) => effect.tipo === "treinar_pericia" && effect.periciaId)
+    .map((effect) => effect.periciaId);
+}
+
+function collectClassAbilityChoiceOptions(classe, classChoices = {}, nivel = 1) {
   const selectedByAbility = classChoices.habilidades ?? {};
-  return (classe?.habilidades ?? []).flatMap((ability) => {
-    const selectedByChoice = selectedByAbility[ability.id] ?? {};
-    return (ability.escolhas ?? []).flatMap((choice) => {
-      const selected = selectedByChoice[choice.id];
-      const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
-      return selectedIds
-        .map((id) => (choice.opcoes ?? []).find((option) => getClassChoiceOptionId(option) === id))
-        .filter(Boolean)
-        .map((option) => (typeof option === "string" ? { id: option } : option));
+  return (classe?.habilidades ?? [])
+    .filter((ability) => Number(ability.nivel ?? 1) <= Number(nivel ?? 1))
+    .flatMap((ability) => {
+      const selectedByChoice = selectedByAbility[ability.id] ?? {};
+      return (ability.escolhas ?? []).flatMap((choice) => {
+        const selected = selectedByChoice[choice.id];
+        const selectedIds = Array.isArray(selected) ? selected : selected ? [selected] : [];
+        return selectedIds
+          .map((id) => (choice.opcoes ?? []).find((option) => getClassChoiceOptionId(option) === id))
+          .filter(Boolean)
+          .map((option) => (typeof option === "string" ? { id: option } : option));
+      });
     });
-  });
 }
 
 function getClassChoiceOptionId(option) {
@@ -1952,6 +2011,14 @@ function getSelectedOficios(classChoices = {}) {
 
   // Combinar e deduplica
   return [...new Set([...fixed.filter(Boolean), ...fromSelections, ...fromAbilityChoices])];
+}
+
+function getClassAbilitySelectedOficios(classChoices = {}) {
+  return [...new Set(Object.values(classChoices.habilidades ?? {})
+    .flatMap((choiceMap) => Object.values(choiceMap ?? {}))
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .filter((id) => String(id).startsWith("oficio_"))
+    .map((id) => String(id).slice("oficio_".length)))];
 }
 
 function filterSkillOptions(options, blockedIds, selectedIds, selectedOficios) {
