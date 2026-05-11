@@ -611,6 +611,17 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
         options: getArtistItemOptions(items)
       };
     }
+    if (isRangedSimpleOrMartialWeaponChoice(itemText)) {
+      return {
+        id: `item_${index}`,
+        kind: "crafted_item",
+        nome: itemText,
+        descricao: "Armas simples ou marciais de ataque à distância.",
+        maxPrice: null,
+        catalog: getRangedSimpleOrMartialWeaponCatalog(items),
+        options: []
+      };
+    }
     const simpleOptions = getSimpleOriginItemOptions(itemText, items);
     if (simpleOptions.length) {
       return {
@@ -813,6 +824,29 @@ function getArtistItemOptions(items) {
   ].sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
+function isRangedSimpleOrMartialWeaponChoice(itemText) {
+  return normalizeText(itemText).includes("arma simples ou marcial de ataque a distancia");
+}
+
+function getRangedSimpleOrMartialWeaponCatalog(items) {
+  const weapons = items
+    .filter((item) => item.tipo === "arma")
+    .filter((item) => ["simples", "marcial"].includes(item.categoriaId))
+    .filter((item) => item.arma?.combateId === "a_distancia")
+    .map((item) => ({
+      ...item,
+      price: getItemPriceValue(item)
+    }));
+
+  return {
+    weapons,
+    armors: [],
+    shields: [],
+    general: [],
+    guidance: "Escolha uma arma simples ou marcial de ataque à distância."
+  };
+}
+
 function getSimpleOriginItemOptions(itemText, items) {
   const normalized = normalizeText(itemText);
   if (!normalized.includes(" ou ")) return [];
@@ -826,11 +860,6 @@ function getSimpleOriginItemOptions(itemText, items) {
     ];
   }
 
-  if (normalized.includes("arma simples ou marcial de ataque a distancia")) {
-    return items
-      .filter((item) => item.tipo === "arma" && ["simples", "marcial"].includes(item.categoriaId) && item.arma?.combateId === "a_distancia")
-      .map(toOriginItemOption);
-  }
   if (normalized.includes("uma arma marcial ou exotica")) {
     return items
       .filter((item) => item.tipo === "arma" && ["marcial", "exotica"].includes(item.categoriaId))
