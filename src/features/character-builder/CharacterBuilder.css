@@ -991,6 +991,11 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.origin-item-filter-stack {
+  display: grid;
+  gap: 8px;
+}
+
 .origin-item-filter-grid--short {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }

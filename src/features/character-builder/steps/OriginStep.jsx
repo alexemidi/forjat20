@@ -1292,36 +1292,35 @@ function OriginCraftedFilters({ activeTab, filters, items, onToggle }) {
     const availableGripIds = new Set(items.map((item) => item.arma?.empunhaduraId).filter(Boolean));
     const availableCombatIds = new Set(items.map((item) => getWeaponCombatFilterId(item)).filter(Boolean));
     return (
-      <div className="origin-item-filter-grid">
-        {[
-          ["weaponCategory", "simples", "Armas Simples"],
-          ["weaponCategory", "marcial", "Armas Marciais"],
-          ["weaponCategory", "exotica", "Armas Exóticas"],
-          ["weaponCategory", "fogo", "Armas de Fogo"],
-          ["weaponGrip", "leve", "Leve"],
-          ["weaponGrip", "uma_mao", "Uma Mão"],
-          ["weaponGrip", "duas_maos", "Duas Mãos"],
-          ["weaponCombat", "corpo", "Corpo a Corpo"],
-          ["weaponCombat", "distancia", "À Distância"]
-        ].filter(([key, value]) => {
-          if (key === "weaponCategory") return availableCategoryIds.has(value);
-          if (key === "weaponGrip") return availableGripIds.has(value);
-          return availableCombatIds.has(value);
-        }).map(([key, value, label]) => {
-          const active = filters[key].includes(value);
-          const disabled = !active && !filterOptionHasResults(items, activeTab, filters, key, value);
-          return (
-            <button
-              className={`origin-item-filter${active ? " origin-item-filter--active" : ""}`}
-              disabled={disabled}
-              key={`${key}_${value}`}
-              onClick={() => onToggle(key, value)}
-              type="button"
-            >
-              {label}
-            </button>
-          );
-        })}
+      <div className="origin-item-filter-stack">
+        <WeaponFilterRow
+          activeTab={activeTab}
+          availableValues={availableCategoryIds}
+          filters={filters}
+          items={items}
+          options={[
+            ["weaponCategory", "simples", "Armas Simples"],
+            ["weaponCategory", "marcial", "Armas Marciais"],
+            ["weaponCategory", "exotica", "Armas Exóticas"],
+            ["weaponCategory", "fogo", "Armas de Fogo"]
+          ]}
+          onToggle={onToggle}
+          resultChecker={filterOptionHasResults}
+        />
+        <WeaponFilterRow
+          activeTab={activeTab}
+          availableByKey={{ weaponGrip: availableGripIds, weaponCombat: availableCombatIds }}
+          filters={filters}
+          items={items}
+          options={[
+            ["weaponGrip", "leve", "Leve"],
+            ["weaponGrip", "uma_mao", "Uma Mão"],
+            ["weaponGrip", "duas_maos", "Duas Mãos"],
+            ["weaponCombat", "distancia", "À Distância"]
+          ]}
+          onToggle={onToggle}
+          resultChecker={filterOptionHasResults}
+        />
       </div>
     );
   }
@@ -1367,6 +1366,33 @@ function OriginCraftedFilters({ activeTab, filters, items, onToggle }) {
             type="button"
           >
             {GENERAL_ITEM_CATEGORY_LABELS[categoryId] ?? formatIdLabel(categoryId)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function WeaponFilterRow({ activeTab, availableValues, availableByKey, filters, items, options, onToggle, resultChecker }) {
+  const visibleOptions = options.filter(([key, value]) => {
+    const available = availableByKey?.[key] ?? availableValues;
+    return available?.has(value);
+  });
+  if (!visibleOptions.length) return null;
+  return (
+    <div className="origin-item-filter-grid">
+      {visibleOptions.map(([key, value, label]) => {
+        const active = filters[key].includes(value);
+        const disabled = !active && !resultChecker(items, activeTab, filters, key, value);
+        return (
+          <button
+            className={`origin-item-filter${active ? " origin-item-filter--active" : ""}`}
+            disabled={disabled}
+            key={`${key}_${value}`}
+            onClick={() => onToggle(key, value)}
+            type="button"
+          >
+            {label}
           </button>
         );
       })}

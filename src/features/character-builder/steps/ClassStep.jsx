@@ -1142,32 +1142,33 @@ function PrototypeShopFilters({ activeTab, filters, items, onToggle }) {
     const gripIds = new Set(items.map((item) => item.arma?.empunhaduraId).filter(Boolean));
     const combatIds = new Set(items.map((item) => getWeaponCombatFilterId(item)).filter(Boolean));
     return (
-      <div className="origin-item-filter-grid">
-        {[
-          ["weaponCategory", "simples", "Armas Simples", categoryIds],
-          ["weaponCategory", "marcial", "Armas Marciais", categoryIds],
-          ["weaponCategory", "exotica", "Armas Exóticas", categoryIds],
-          ["weaponCategory", "fogo", "Armas de Fogo", categoryIds],
-          ["weaponGrip", "leve", "Leve", gripIds],
-          ["weaponGrip", "uma_mao", "Uma Mão", gripIds],
-          ["weaponGrip", "duas_maos", "Duas Mãos", gripIds],
-          ["weaponCombat", "corpo", "Corpo a Corpo", combatIds],
-          ["weaponCombat", "distancia", "À Distância", combatIds]
-        ].filter(([, value, , available]) => available.has(value)).map(([key, value, label]) => {
-          const active = filters[key].includes(value);
-          const disabled = !active && !prototypeFilterOptionHasResults(items, activeTab, filters, key, value);
-          return (
-            <button
-              className={`origin-item-filter${active ? " origin-item-filter--active" : ""}`}
-              disabled={disabled}
-              key={`${key}_${value}`}
-              onClick={() => onToggle(key, value)}
-              type="button"
-            >
-              {label}
-            </button>
-          );
-        })}
+      <div className="origin-item-filter-stack">
+        <PrototypeWeaponFilterRow
+          activeTab={activeTab}
+          availableValues={categoryIds}
+          filters={filters}
+          items={items}
+          options={[
+            ["weaponCategory", "simples", "Armas Simples"],
+            ["weaponCategory", "marcial", "Armas Marciais"],
+            ["weaponCategory", "exotica", "Armas Exóticas"],
+            ["weaponCategory", "fogo", "Armas de Fogo"]
+          ]}
+          onToggle={onToggle}
+        />
+        <PrototypeWeaponFilterRow
+          activeTab={activeTab}
+          availableByKey={{ weaponGrip: gripIds, weaponCombat: combatIds }}
+          filters={filters}
+          items={items}
+          options={[
+            ["weaponGrip", "leve", "Leve"],
+            ["weaponGrip", "uma_mao", "Uma Mão"],
+            ["weaponGrip", "duas_maos", "Duas Mãos"],
+            ["weaponCombat", "distancia", "À Distância"]
+          ]}
+          onToggle={onToggle}
+        />
       </div>
     );
   }
@@ -1214,6 +1215,33 @@ function PrototypeShopFilters({ activeTab, filters, items, onToggle }) {
             className={`origin-item-filter${active ? " origin-item-filter--active" : ""}`}
             key={categoryId}
             onClick={() => onToggle("generalCategory", categoryId)}
+            type="button"
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PrototypeWeaponFilterRow({ activeTab, availableValues, availableByKey, filters, items, options, onToggle }) {
+  const visibleOptions = options.filter(([key, value]) => {
+    const available = availableByKey?.[key] ?? availableValues;
+    return available?.has(value);
+  });
+  if (!visibleOptions.length) return null;
+  return (
+    <div className="origin-item-filter-grid">
+      {visibleOptions.map(([key, value, label]) => {
+        const active = filters[key].includes(value);
+        const disabled = !active && !prototypeFilterOptionHasResults(items, activeTab, filters, key, value);
+        return (
+          <button
+            className={`origin-item-filter${active ? " origin-item-filter--active" : ""}`}
+            disabled={disabled}
+            key={`${key}_${value}`}
+            onClick={() => onToggle(key, value)}
             type="button"
           >
             {label}
