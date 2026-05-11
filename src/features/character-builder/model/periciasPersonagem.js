@@ -37,6 +37,8 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const nivel = Number(draft.info.nivel ?? 1);
   const escolhasClasse = draft.escolhas.classe ?? {};
   const escolhasOrigem = draft.escolhas.origem ?? {};
+  const escolhasOrigemRegional = draft.escolhas.origemRegional ?? {};
+  const origemRegional = catalogs.regionalOrigins?.find((origin) => (origin.id ?? origin.nome) === draft.info.origemRegionalId);
   const bonusNivelPericia = calcularBonusNivelPericia(nivel);
   const bonusTamanhoFurtividade = Number(options.bonusTamanhoFurtividade ?? 0);
 
@@ -46,9 +48,22 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const periciasEscolhidasClasse = new Set((escolhasClasse.periciasClasse ?? []).map(getPericiaBaseId));
   const periciasInteligenciaClasse = new Set((escolhasClasse.periciasInteligencia ?? []).map(getPericiaBaseId));
   const periciasOrigem = new Set(getPericiasOrigemSelecionadas(escolhasOrigem));
-  const oficiosSelecionados = getSelectedOficios(escolhasClasse, escolhasOrigem);
   const periciasConcedidasEscolhasClasse = getClassChoiceGrantedSkills(classe, escolhasClasse);
   const treinadasRaciais = race ? coletarPericiasTreinadasRaciais(race, raceChoices) : new Set();
+  const treinadasAntesRegional = new Set([
+    ...fixasClasse,
+    ...fixasEscolhidasClasse,
+    ...periciasEscolhidasRaca,
+    ...periciasEscolhidasClasse,
+    ...periciasInteligenciaClasse,
+    ...periciasOrigem,
+    ...periciasConcedidasEscolhasClasse,
+    ...treinadasRaciais
+  ]);
+  const periciasRegionais = getPericiasRegionais(origemRegional, escolhasOrigemRegional, treinadasAntesRegional);
+  const oficiosSelecionados = getSelectedOficios(escolhasClasse, escolhasOrigem, origemRegional);
+  const bonusRegional = getBonusPericiasRegionais(origemRegional);
+  const consideradasSemTreino = getPericiasConsideradasTreinadasRegionais(origemRegional);
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
   const bonusPericiasItens = coletarBonusPericiasMelhorias(draft, catalogs);
 
@@ -61,14 +76,17 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
       periciasEscolhidasClasse.has(pericia.id) ||
       periciasInteligenciaClasse.has(pericia.id) ||
       periciasOrigem.has(pericia.id) ||
+      periciasRegionais.has(pericia.id) ||
       periciasConcedidasEscolhasClasse.has(pericia.id) ||
       treinadasRaciais.has(pericia.id);
     const atributoValor = Number(attrs[pericia.atributo] ?? 0);
     const racial = Number(bonusRacial[pericia.id] ?? 0);
+    const regional = Number(bonusRegional[pericia.id] ?? 0);
     const tamanho = pericia.id === "furtividade" ? bonusTamanhoFurtividade : 0;
-    const bloqueada = Boolean(pericia.requerTreinamento && !treinada);
+    const liberadaSemTreino = consideradasSemTreino.has(pericia.id);
+    const bloqueada = Boolean(pericia.requerTreinamento && !treinada && !liberadaSemTreino);
     const bonusItem = bloqueada ? 0 : Number(bonusPericiasItens[pericia.id] ?? 0);
-    const bonusDiversos = racial + tamanho + bonusItem;
+    const bonusDiversos = racial + regional + tamanho + bonusItem;
     const bonusTreino = calcularBonusTreinamentoPericia(nivel, treinada);
     const total = bloqueada
       ? bonusDiversos
@@ -77,6 +95,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
     const base = {
       ...pericia,
       treinada,
+      consideradaSemTreino: liberadaSemTreino,
       bloqueada,
       atributoValor,
       bonusNivel: bonusNivelPericia,
@@ -155,8 +174,11 @@ function coletarBonusPericiasMelhorias(draft, catalogs) {
 
 function getSelectedPrototypeImprovementIds(draft) {
   const itemSuperior = draft.escolhas?.classe?.prototipo?.itemSuperior ?? {};
-  if (Array.isArray(itemSuperior.melhoriaIds)) return itemSuperior.melhoriaIds.filter(Boolean);
-  return itemSuperior.melhoriaId ? [itemSuperior.melhoriaId] : [];
+  const prototypeIds = Array.isArray(itemSuperior.melhoriaIds)
+    ? itemSuperior.melhoriaIds.filter(Boolean)
+    : itemSuperior.melhoriaId ? [itemSuperior.melhoriaId] : [];
+  const regionalIds = Object.values(draft.escolhas?.origemRegional?.melhorias ?? {}).filter(Boolean);
+  return [...prototypeIds, ...regionalIds];
 }
 
 function getPericiasOrigemSelecionadas(escolhasOrigem = {}) {
@@ -166,6 +188,64 @@ function getPericiasOrigemSelecionadas(escolhasOrigem = {}) {
       const value = String(id).slice("pericia:".length);
       return normalizarPericiaId(value.split(":")[0]);
     });
+}
+
+function getPericiasRegionais(origemRegional, escolhasOrigemRegional = {}, treinadasAntesRegional = new Set()) {
+  if (!origemRegional) return new Set();
+  const trained = extractRegionalTrainedSkills(origemRegional.beneficios?.descricao ?? "")
+    .filter((id) => !treinadasAntesRegional.has(id));
+  const replacements = Object.values(escolhasOrigemRegional.periciasSubstitutas ?? {}).filter(Boolean);
+  return new Set([...trained, ...replacements]);
+}
+
+function getBonusPericiasRegionais(origemRegional) {
+  if (!origemRegional) return {};
+  const bonus = {};
+  [
+    ...(extractRegionalSkillBonuses(origemRegional.beneficios?.descricao ?? "")),
+    ...(origemRegional.itens ?? []).flatMap((itemText) => extractRegionalSkillBonuses(itemText))
+  ].forEach((entry) => {
+    bonus[entry.id] = Number(bonus[entry.id] ?? 0) + Number(entry.valor ?? 0);
+  });
+  return bonus;
+}
+
+function getPericiasConsideradasTreinadasRegionais(origemRegional) {
+  if (!origemRegional) return new Set();
+  const description = normalizeText(origemRegional.beneficios?.descricao ?? "");
+  const result = [];
+  if (description.includes("misticismo sem treino")) result.push("misticismo");
+  if (description.includes("conhecimento e nobreza") && description.includes("mesmo sem treinamento")) result.push("conhecimento", "nobreza");
+  return new Set(result);
+}
+
+function extractRegionalTrainedSkills(description) {
+  const normalized = normalizeText(description);
+  const match = normalized.match(/treinad[oa] em ([^.]+)/);
+  if (!match) return [];
+  return splitRegionalSkillList(match[1].replace(/\b(e recebe|e possui|e pode|quando|alem disso|como usa).*/u, ""));
+}
+
+function extractRegionalSkillBonuses(description) {
+  const bonuses = [];
+  const normalized = normalizeText(description);
+  for (const match of normalized.matchAll(/([+-]\d+)\s+em(?: testes de)?\s+([^.,;]+)/g)) {
+    const valor = Number(match[1]);
+    splitRegionalSkillList(match[2]).forEach((id) => bonuses.push({ id, valor }));
+  }
+  for (const match of normalized.matchAll(/fornece\s+([+-]\d+)\s+em testes de\s+([^.,;]+)/g)) {
+    const valor = Number(match[1]);
+    splitRegionalSkillList(match[2]).forEach((id) => bonuses.push({ id, valor }));
+  }
+  return bonuses.filter((bonus, index, list) => list.findIndex((entry) => entry.id === bonus.id && entry.valor === bonus.valor) === index);
+}
+
+function splitRegionalSkillList(value) {
+  return String(value ?? "")
+    .replace(/\([^)]*\)/g, "")
+    .split(/\s*,\s*|\s+e\s+/)
+    .map((entry) => normalizarPericiaId(entry))
+    .filter((id) => PERICIAS.some((pericia) => pericia.id === id));
 }
 
 function getPericiaBaseId(periciaId) {
@@ -181,7 +261,7 @@ function normalizarPericiaId(nome) {
     .replace(/^_+|_+$/g, "");
 }
 
-function getSelectedOficios(classChoices = {}, originChoices = {}) {
+function getSelectedOficios(classChoices = {}, originChoices = {}, origemRegional = null) {
   const fixed = Array.isArray(classChoices.oficiosFixos)
     ? classChoices.oficiosFixos
     : Object.values(classChoices.oficiosFixos ?? {});
@@ -201,5 +281,8 @@ function getSelectedOficios(classChoices = {}, originChoices = {}) {
     .flatMap((value) => Array.isArray(value) ? value : [value])
     .filter((id) => String(id).startsWith("oficio_"))
     .map((id) => String(id).slice("oficio_".length));
-  return [...new Set([...fixed.filter(Boolean), ...fromSelections, ...fromOrigin, ...fromAbilityChoices])];
+  const fromRegional = [...(origemRegional?.beneficios?.descricao ?? "").matchAll(/Ofício\s*\(([^)]+)\)/gi)]
+    .map((match) => normalizarPericiaId(match[1]))
+    .filter(Boolean);
+  return [...new Set([...fixed.filter(Boolean), ...fromSelections, ...fromOrigin, ...fromAbilityChoices, ...fromRegional])];
 }

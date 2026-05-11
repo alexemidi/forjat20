@@ -64,6 +64,11 @@ export function criarPersonagemDraft() {
         beneficios: [],
         itens: {}
       },
+      origemRegional: {
+        itens: {},
+        periciasSubstitutas: {},
+        melhorias: {}
+      },
       poderOrigemId: "",
       equipamentoInicialIds: [],
       escolasMagiaIds: [],

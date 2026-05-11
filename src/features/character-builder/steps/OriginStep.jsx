@@ -268,7 +268,7 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
   );
 }
 
-function getOriginValue(origin) {
+export function getOriginValue(origin) {
   return origin.id ?? origin.nome;
 }
 
@@ -396,7 +396,7 @@ function getOriginBenefits(origin, powers, trainedBeforeOrigin) {
   ].filter(Boolean);
 }
 
-const OFICIOS = [
+export const OFICIOS = [
   { id: "alquimista", label: "Alquimista" },
   { id: "armeiro", label: "Armeiro" },
   { id: "artesao", label: "Artesão" },
@@ -416,7 +416,7 @@ const OFICIOS = [
   { id: "mercador", label: "Mercador" }
 ];
 
-function OriginOficioPopover({ currentOficioId = "", oficioOptions = OFICIOS, trainedBeforeOrigin = new Set(), onClose, onSelect }) {
+export function OriginOficioPopover({ currentOficioId = "", oficioOptions = OFICIOS, trainedBeforeOrigin = new Set(), onClose, onSelect }) {
   const options = oficioOptions.filter((oficio) => oficio.id === currentOficioId || !trainedBeforeOrigin.has(oficio.id));
   return (
     <div className="class-oficio-popover origin-oficio-popover" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="false" aria-label="Escolher ofício">
@@ -456,7 +456,7 @@ function getSelectedOriginOficioId(selectedBenefits, benefitId) {
   return selected ? String(selected).slice(prefix.length) : "";
 }
 
-function getOficioLabel(oficioId) {
+export function getOficioLabel(oficioId) {
   return OFICIOS.find((oficio) => oficio.id === oficioId)?.label ?? oficioId;
 }
 
@@ -871,7 +871,7 @@ const CRAFTED_ITEM_TABS = [
   { id: "general", label: "Itens gerais" }
 ];
 
-function OriginCraftedItemDialog({ currentItemId, entry, onClose, onSelect }) {
+export function OriginCraftedItemDialog({ currentItemId, entry, onClose, onSelect }) {
   const availableTabs = CRAFTED_ITEM_TABS.filter((tab) => entry.catalog?.[tab.id]?.length);
   const [activeTab, setActiveTab] = useState(availableTabs[0]?.id ?? "weapons");
   const [filters, setFilters] = useState({

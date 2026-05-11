@@ -93,6 +93,7 @@ export function DebugPanel({ draft, catalogs }) {
   const race   = catalogs.races.find((r) => r.id === draft.info.racaId);
   const classe = catalogs.classes.find((c) => c.id === draft.info.classeId);
   const origem = catalogs.origins.find((o) => getCatalogEntryValue(o) === draft.info.origemId);
+  const origemRegional = catalogs.regionalOrigins.find((o) => getCatalogEntryValue(o) === draft.info.origemRegionalId);
   const deus   = catalogs.gods.find((d) => d.id === draft.info.deusId);
 
   const nivel       = Number(draft.info.nivel ?? 1);
@@ -171,10 +172,11 @@ export function DebugPanel({ draft, catalogs }) {
   // Proficiências
   */
   const proficiencias = classe?.caracteristicas?.proficiencias ?? [];
+  const proficienciasRegionais = coletarProficienciasOrigemRegional(origemRegional);
   const proficienciasRaciais = race ? coletarProficienciasRaciais(race, raceChoices) : [];
   const bonusAtaqueRaciais = race ? coletarBonusAtaqueRaciais(race, raceChoices) : [];
   const bonusDanoRaciais = race ? coletarBonusDanoRaciais(race, raceChoices) : [];
-  const mochila = montarMochilaDebug(draft, catalogs, origem, pericias);
+  const mochila = montarMochilaDebug(draft, catalogs, origem, pericias, origemRegional);
   const autoEquipamentoArma = getAutoEquippedWeaponSlot(mochila, empunhadura);
   const armaAutoDireita = autoEquipamentoArma?.mao === "maoDireita" || autoEquipamentoArma?.duasMaos ? autoEquipamentoArma.arma : null;
   const armaAutoEsquerda = autoEquipamentoArma?.mao === "maoEsquerda" || autoEquipamentoArma?.duasMaos ? autoEquipamentoArma.arma : null;
@@ -285,9 +287,10 @@ export function DebugPanel({ draft, catalogs }) {
         </DbgSection>
 
         <DbgSection title="Proficiências">
-          {proficiencias.length || proficienciasRaciais.length || bonusAtaqueRaciais.length || bonusDanoRaciais.length
+          {proficiencias.length || proficienciasRegionais.length || proficienciasRaciais.length || bonusAtaqueRaciais.length || bonusDanoRaciais.length
             ? proficiencias.map((p, i) => <div key={i} className="dbg__tag">{p}</div>)
             : <span className="dbg__none">{classe ? "Nenhuma" : "Sem classe selecionada"}</span>}
+          {proficienciasRegionais.map((p, i) => <div key={`or-${i}`} className="dbg__tag">{p}</div>)}
           {proficienciasRaciais.map((p, i) => <div key={`r-${i}`} className="dbg__tag">{p.descricao}</div>)}
           {bonusAtaqueRaciais.map((bonus, i) => (
             <div key={`b-${i}`} className="dbg__ability">
@@ -381,9 +384,11 @@ const OFICIO_LABELS = {
   pintor: "pintor"
 };
 
-function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
+function montarMochilaDebug(draft, catalogs, origem, pericias = [], origemRegional = null) {
   const entries = new Map();
   const selectedOriginItems = draft.escolhas?.origem?.itens ?? {};
+  const selectedRegionalItems = draft.escolhas?.origemRegional?.itens ?? {};
+  const selectedRegionalImprovements = draft.escolhas?.origemRegional?.melhorias ?? {};
   const defaultOficioId = pericias.find((pericia) => String(pericia.id).startsWith("oficio:"))?.id?.slice("oficio:".length) ?? "";
 
   function addItem(itemId, quantidade = 1, nomeOverride = "", melhoriaIds = []) {
@@ -428,6 +433,26 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
     if (fixedItem) addItem(fixedItem.id);
   });
 
+  (origemRegional?.itens ?? []).forEach((itemText, index) => {
+    const slotId = `item_${index}`;
+    const selectedItemId = selectedRegionalItems[slotId];
+    const quantity = getDebugItemQuantity(itemText);
+    const oficioId = getDebugInstrumentOficioId(itemText);
+
+    if (oficioId) {
+      addInstrumentosOficio(selectedItemId || oficioId);
+      return;
+    }
+
+    if (selectedItemId) {
+      addItem(selectedItemId, quantity, getDebugSuperiorItemName(selectedItemId, itemText, catalogs, selectedRegionalImprovements[slotId]), selectedRegionalImprovements[slotId] ? [selectedRegionalImprovements[slotId]] : []);
+      return;
+    }
+
+    const fixedItem = findDebugItemFromText(itemText, catalogs.items);
+    if (fixedItem) addItem(fixedItem.id, quantity);
+  });
+
   const prototipo = draft.escolhas?.classe?.prototipo ?? {};
   if (prototipo.itemSuperior?.itemId) {
     const selectedImprovementIds = getDebugPrototypeImprovementIds(prototipo.itemSuperior);
@@ -459,6 +484,34 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = []) {
 function isDebugOficioInstrumentChoice(itemText) {
   const normalized = normalizeDebugText(itemText);
   return normalized.includes("instrumentos de oficio") && normalized.includes("qualquer");
+}
+
+function getDebugInstrumentOficioId(itemText) {
+  const match = String(itemText ?? "").match(/Instrumentos de Ofício\s*\(([^)]+)\)/i);
+  return match ? normalizeDebugText(match[1]).replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "") : "";
+}
+
+function getDebugItemQuantity(itemText) {
+  const match = normalizeDebugText(itemText).match(/\bx\s*(\d+)\b/);
+  return match ? Number(match[1]) : 1;
+}
+
+function findDebugItemFromText(itemText, items) {
+  const normalized = normalizeDebugText(String(itemText ?? "").replace(/\([^)]*\)/g, ""));
+  return items.find((item) => normalized.includes(normalizeDebugText(item.nome)));
+}
+
+function getDebugSuperiorItemName(itemId, itemText, catalogs, improvementId = "") {
+  if (!normalizeDebugText(itemText).includes("superior")) return "";
+  const item = catalogs.items.find((catalogItem) => catalogItem.id === itemId);
+  const improvement = catalogs.improvements.find((entry) => entry.id === improvementId);
+  const suffix = improvement ? `, ${improvement.nome}` : "";
+  return item ? `${item.nome} (Superior${suffix})` : "";
+}
+
+function coletarProficienciasOrigemRegional(origemRegional) {
+  const descricao = origemRegional?.beneficios?.descricao ?? "";
+  return [...descricao.matchAll(/profici[êe]ncia(?: com| em)\s+([^.;]+)/gi)].map((match) => match[0]);
 }
 
 function getDebugPrototypeImprovementIds(itemSuperior) {

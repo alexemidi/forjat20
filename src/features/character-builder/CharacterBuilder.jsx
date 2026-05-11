@@ -8,6 +8,7 @@ import { DebugPanel } from "./DebugPanel.jsx";
 import { RaceAttributesStep, isRaceChoiceComplete } from "./steps/RaceAttributesStep.jsx";
 import { ClassStep } from "./steps/ClassStep.jsx";
 import { OriginStep } from "./steps/OriginStep.jsx";
+import { RegionalOriginStep } from "./steps/RegionalOriginStep.jsx";
 import { ChoiceStep } from "./steps/ChoiceStep.jsx";
 import { ReviewStep } from "./steps/ReviewStep.jsx";
 import "./CharacterBuilder.css";
@@ -120,17 +121,7 @@ function StepContent({ pageId, catalogs, draft, updateDraft }) {
     case "origem":
       return <OriginStep catalogs={catalogs} draft={draft} updateDraft={updateDraft} />;
     case "origem-regional":
-      return (
-        <ChoiceStep
-          description="Escolha uma origem regional quando a campanha permitir."
-          entries={catalogs.regionalOrigins}
-          fieldPath="info.origemRegionalId"
-          label="Origem regional"
-          title="Origem Regional"
-          value={draft.info.origemRegionalId}
-          updateDraft={updateDraft}
-        />
-      );
+      return <RegionalOriginStep catalogs={catalogs} draft={draft} updateDraft={updateDraft} />;
     case "divindade":
       return (
         <ChoiceStep
