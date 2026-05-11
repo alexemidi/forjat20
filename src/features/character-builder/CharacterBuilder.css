@@ -802,6 +802,12 @@
   font-weight: 800;
 }
 
+.origin-amnesico-pending {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .origin-item-list {
   display: grid;
   gap: 8px;
@@ -1274,6 +1280,7 @@
   .class-power-grid,
   .origin-benefit-grid,
   .origin-benefit-grid--skills,
+  .origin-amnesico-pending,
   .origin-item-row,
   .origin-item-tabs,
   .origin-item-filter-grid,

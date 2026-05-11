@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { filterBySearch } from "../../../shared/lib/catalogFilters.js";
 import { SelectInput, TextInput } from "../../../shared/ui/TextInput.jsx";
 import { calcularPericiasPersonagem } from "../model/periciasPersonagem.js";
@@ -13,6 +13,8 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
   const selectedOrigin = catalogs.origins.find((origin) => getOriginValue(origin) === draft.info.origemId);
   const selectedBenefits = draft.escolhas.origem?.beneficios ?? [];
   const selectedItems = draft.escolhas.origem?.itens ?? {};
+  const isAmnesico = isAmnesicoOrigin(selectedOrigin);
+  const effectiveSelectedBenefits = isAmnesico ? getAutomaticOriginBenefitIds(selectedOrigin) : selectedBenefits;
   const visibleOrigins = useMemo(
     () => filterBySearch(catalogs.origins, search, [(entry) => entry.nome]),
     [catalogs.origins, search]
@@ -42,14 +44,16 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
   const defaultInstrumentOficioId = selectedCharacterOficios[0] ?? "";
 
   function setOrigin(originId) {
+    const nextOrigin = catalogs.origins.find((origin) => getOriginValue(origin) === originId);
     updateDraft("info.origemId", originId);
     updateDraft("escolhas.origem", {
-      beneficios: [],
+      beneficios: isAmnesicoOrigin(nextOrigin) ? getAutomaticOriginBenefitIds(nextOrigin) : [],
       itens: {}
     });
   }
 
   function toggleBenefit(benefit) {
+    if (isAmnesico) return;
     if (benefit.isOficio) return;
     const benefitId = benefit.id;
     if (selectedBenefits.includes(benefitId)) {
@@ -93,6 +97,7 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
   }
 
   function setOriginOficio(benefit, oficioId) {
+    if (isAmnesico) return;
     const prefix = `${benefit.id}:`;
     const nextId = `${prefix}${oficioId}`;
     const withoutOficio = selectedBenefits.filter((id) => id !== benefit.id && !String(id).startsWith(prefix));
@@ -102,6 +107,7 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
   }
 
   function removeOriginOficio(benefit) {
+    if (isAmnesico) return;
     const prefix = `${benefit.id}:`;
     updateDraft("escolhas.origem.beneficios", selectedBenefits.filter((id) => id !== benefit.id && !String(id).startsWith(prefix)));
     setOpenOriginOficio(null);
@@ -111,6 +117,13 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
   const skillBenefits = benefits.filter((benefit) => benefit.kind === "pericia");
   const powerBenefits = benefits.filter((benefit) => benefit.kind !== "pericia");
   const itemEntries = selectedOrigin ? getOriginItemEntries(selectedOrigin, catalogs.items, selectedCharacterOficios) : [];
+
+  useEffect(() => {
+    if (!isAmnesico) return;
+    const automaticBenefits = getAutomaticOriginBenefitIds(selectedOrigin);
+    if (sameStringArray(selectedBenefits, automaticBenefits)) return;
+    updateDraft("escolhas.origem.beneficios", automaticBenefits);
+  }, [isAmnesico, selectedBenefits, selectedOrigin, updateDraft]);
 
   return (
     <div className="builder-step">
@@ -155,25 +168,30 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
           <section className="builder-section">
             <div className="builder-section__header">
               <h2>Benefícios</h2>
-              <span className="pill">{selectedBenefits.length}/{BENEFIT_LIMIT}</span>
+              <span className="pill">{isAmnesico ? "Automático" : `${selectedBenefits.length}/${BENEFIT_LIMIT}`}</span>
             </div>
-            <p className="points-note">Escolha dois benefícios: perícias, poderes gerais ou o poder único da origem.</p>
+            <p className="points-note">
+              {isAmnesico
+                ? "Lembranças Graduais é recebido automaticamente. A perícia e o poder adicionais serão definidos posteriormente pelo mestre."
+                : "Escolha dois benefícios: perícias, poderes gerais ou o poder único da origem."}
+            </p>
             <OriginBenefitGrid
               benefits={skillBenefits}
               onRemoveOficio={removeOriginOficio}
               onSelectOficio={setOriginOficio}
               onToggle={toggleBenefit}
               openOficio={openOriginOficio}
-              selectedBenefits={selectedBenefits}
+              selectedBenefits={effectiveSelectedBenefits}
               setOpenOficio={setOpenOriginOficio}
               skill
             />
             {powerBenefits.length ? (
               <>
                 <div className="origin-benefit-separator" />
-                <OriginBenefitGrid benefits={powerBenefits} selectedBenefits={selectedBenefits} onToggle={toggleBenefit} />
+                <OriginBenefitGrid benefits={powerBenefits} selectedBenefits={effectiveSelectedBenefits} onToggle={toggleBenefit} />
               </>
             ) : null}
+            {isAmnesico ? <AmnesicoPendingBenefits /> : null}
           </section>
 
           <section className="builder-section">
@@ -445,6 +463,35 @@ function getOriginBenefits(origin, powers, trainedBeforeOrigin) {
         }
       : null
   ].filter(Boolean);
+}
+
+function AmnesicoPendingBenefits() {
+  return (
+    <div className="origin-amnesico-pending">
+      <div className="origin-benefit-card origin-benefit-card--locked">
+        <span>Pendente</span>
+        <strong>Perícia escolhida pelo mestre</strong>
+        <small>Adicionar depois da finalização da ficha, conforme definição do mestre.</small>
+      </div>
+      <div className="origin-benefit-card origin-benefit-card--locked">
+        <span>Pendente</span>
+        <strong>Poder escolhido pelo mestre</strong>
+        <small>Adicionar depois da finalização da ficha, conforme definição do mestre.</small>
+      </div>
+    </div>
+  );
+}
+
+function isAmnesicoOrigin(origin) {
+  return normalizeId(origin?.nome) === "amnesico" || normalizeId(origin?.id) === "amnesico";
+}
+
+function getAutomaticOriginBenefitIds(origin) {
+  return origin?.beneficios?.poder_unico?.nome ? [`poder_unico:${origin.beneficios.poder_unico.nome}`] : [];
+}
+
+function sameStringArray(first = [], second = []) {
+  return first.length === second.length && first.every((value, index) => value === second[index]);
 }
 
 export const OFICIOS = [
