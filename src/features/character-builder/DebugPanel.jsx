@@ -514,10 +514,11 @@ function isDebugBudgetItemChoice(itemText) {
 
 function getAutoMountFromOrigin(draft, origem) {
   const selectedOriginItems = draft.escolhas?.origem?.itens ?? {};
+  const riderSize = draft.corpo?.tamanhoId ?? "medio";
   const mountId = (origem?.itens ?? [])
     .map((itemText, index) => {
       const selectedId = selectedOriginItems[`item_${index}`];
-      return selectedId && MONTARIAS[selectedId] && MONTARIAS[selectedId].tamanhoId === "grande" ? selectedId : "";
+      return canAutoMount(selectedId, riderSize) ? selectedId : "";
     })
     .find(Boolean);
   if (!mountId) return null;
@@ -526,8 +527,14 @@ function getAutoMountFromOrigin(draft, origem) {
     montariaId: mountId,
     tamanhoId: MONTARIAS[mountId].tamanhoId,
     nivelMontaria: "iniciante",
-    treinadoEmCavalgar: true
+    treinadoEmCavalgar: Boolean(MONTARIAS[mountId].dispensaTesteCombate)
   };
+}
+
+function canAutoMount(mountId, riderSize) {
+  if (!mountId || !MONTARIAS[mountId]) return false;
+  if (mountId === "cao_de_caca") return riderSize === "pequeno" || riderSize === "minusculo";
+  return MONTARIAS[mountId].tamanhoId === "grande" || MONTARIAS[mountId].tamanhoId === "medio";
 }
 
 function getDebugInstrumentOficioId(itemText) {

@@ -21,6 +21,38 @@ export const MONTARIAS = {
       mestre: { deslocamentoBase: 15, acoesMovimentoExtras: 2, bonusAtaqueCorpoACorpo: 2 }
     }
   },
+  cavalo_de_guerra: {
+    id: "cavalo_de_guerra",
+    nome: "Cavalo de Guerra",
+    tamanhoId: "grande",
+    dispensaTesteCombate: true,
+    beneficios: {
+      iniciante: { deslocamentoBase: 12, acoesMovimentoExtras: 1 },
+      veterano: { deslocamentoBase: 15, acoesMovimentoExtras: 1, bonusAtaqueCorpoACorpo: 2 },
+      mestre: { deslocamentoBase: 15, acoesMovimentoExtras: 2, bonusAtaqueCorpoACorpo: 2 }
+    }
+  },
+  ponei: {
+    id: "ponei",
+    nome: "Ponei",
+    tamanhoId: "medio",
+    beneficios: {
+      iniciante: { deslocamentoBase: 12, acoesMovimentoExtras: 1 },
+      veterano: { deslocamentoBase: 15, acoesMovimentoExtras: 1, bonusAtaqueCorpoACorpo: 2 },
+      mestre: { deslocamentoBase: 15, acoesMovimentoExtras: 2, bonusAtaqueCorpoACorpo: 2 }
+    }
+  },
+  ponei_de_guerra: {
+    id: "ponei_de_guerra",
+    nome: "Ponei de Guerra",
+    tamanhoId: "medio",
+    dispensaTesteCombate: true,
+    beneficios: {
+      iniciante: { deslocamentoBase: 12, acoesMovimentoExtras: 1 },
+      veterano: { deslocamentoBase: 15, acoesMovimentoExtras: 1, bonusAtaqueCorpoACorpo: 2 },
+      mestre: { deslocamentoBase: 15, acoesMovimentoExtras: 2, bonusAtaqueCorpoACorpo: 2 }
+    }
+  },
   cao_de_caca: {
     id: "cao_de_caca",
     nome: "Cao de caca",
@@ -281,6 +313,17 @@ export function calcularPenalidadesCombateMontado(personagem) {
 
   if (montaria.natural || montaria.treinadoEmCavalgar || montaria.possuiGinete) {
     return { penalidadeAtaqueDistancia: 0, condicaoMagia: "normal", exigeTesteGuia: false, testeQuedaAoSofrerDano: false };
+  }
+
+  if (["cavalo", "ponei"].includes(montaria.montariaId)) {
+    return {
+      penalidadeAtaqueDistancia: -2,
+      condicaoMagia: "ruim",
+      exigeTesteGuia: true,
+      testeGuia: "Cavalgar CD 20 por rodada para permanecer montado em combate",
+      testeQuedaAoSofrerDano: true,
+      testeQueda: "Cavalgar CD igual ao dano sofrido; falha derruba e causa 1d6"
+    };
   }
 
   return {

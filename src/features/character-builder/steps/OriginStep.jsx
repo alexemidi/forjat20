@@ -629,9 +629,9 @@ function getSimpleOriginItemOptions(itemText, items) {
 
   if (normalized.includes("cao de caca") && normalized.includes("cavalo") && normalized.includes("ponei") && normalized.includes("trobo")) {
     return [
-      { id: "cao_de_caca", nome: "Cão de caça" },
+      ...items.filter((item) => item.id === "cao_de_caca").map(toOriginItemOption),
       ...items.filter((item) => item.id === "cavalo").map(toOriginItemOption),
-      { id: "ponei", nome: "Pônei" },
+      ...items.filter((item) => item.id === "ponei").map(toOriginItemOption),
       ...items.filter((item) => item.id === "trobo").map(toOriginItemOption)
     ];
   }
