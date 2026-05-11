@@ -248,6 +248,22 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                         />
                       ) : null}
                     </div>
+                  ) : entry.options?.length && entry.options.length <= 4 ? (
+                    <div className="origin-item-actions">
+                      {entry.options.map((option) => (
+                        <button
+                          className={`origin-item-select-button${selectedItems[entry.id] === option.id ? " choice-button--active" : ""}`}
+                          key={option.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setOriginItem(entry.id, option.id);
+                          }}
+                          type="button"
+                        >
+                          {option.nome}
+                        </button>
+                      ))}
+                    </div>
                   ) : entry.options?.length ? (
                     <select onChange={(event) => setOriginItem(entry.id, event.target.value)} value={selectedItems[entry.id] ?? ""}>
                       <option value="">Escolha</option>
@@ -494,6 +510,17 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
         options: []
       };
     }
+    const fixedOficioId = getFixedInstrumentOficioId(itemText);
+    if (fixedOficioId) {
+      return {
+        id: `item_${index}`,
+        kind: "instrumentos_oficio_fixo",
+        nome: `Instrumentos de Ofício (${getOficioLabel(fixedOficioId).toLowerCase()})`,
+        descricao: itemText,
+        oficioId: fixedOficioId,
+        options: []
+      };
+    }
     if (isArtistChoice(itemText)) {
       return {
         id: `item_${index}`,
@@ -523,6 +550,18 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
         options: []
       };
     }
+    if (isBudgetItemChoice(itemText)) {
+      const maxPrice = getCraftedItemPriceLimit(itemText);
+      return {
+        id: `item_${index}`,
+        kind: "crafted_item",
+        nome: itemText,
+        descricao: maxPrice ? `Itens com preço total até T$ ${maxPrice}.` : null,
+        maxPrice,
+        catalog: getAnyItemCatalog(items, maxPrice),
+        options: []
+      };
+    }
     return {
       id: `item_${index}`,
       nome: itemText,
@@ -537,6 +576,11 @@ function isOficioInstrumentChoice(itemText) {
   return normalized.includes("instrumentos de oficio") && normalized.includes("qualquer");
 }
 
+function getFixedInstrumentOficioId(itemText) {
+  const match = String(itemText ?? "").match(/Instrumentos de Ofício\s*\(([^)]+)\)/i);
+  return match ? normalizeId(match[1]) : "";
+}
+
 function formatOriginItemName(entry, selectedValue, selectedItems = {}, defaultInstrumentOficioId = "") {
   if (entry.options?.length && selectedValue) {
     return entry.options.find((option) => option.id === selectedValue)?.nome ?? entry.nome;
@@ -544,6 +588,9 @@ function formatOriginItemName(entry, selectedValue, selectedItems = {}, defaultI
   if (entry.kind === "instrumentos_oficio") {
     const oficioId = selectedValue || defaultInstrumentOficioId;
     if (oficioId) return `Instrumentos de Of\u00edcio (${getOficioLabel(oficioId).toLowerCase()})`;
+  }
+  if (entry.kind === "instrumentos_oficio_fixo") {
+    return `Instrumentos de Ofício (${getOficioLabel(entry.oficioId).toLowerCase()})`;
   }
   if (entry.kind === "crafted_item" && selectedValue) {
     const item = resolveCraftedCatalogItem(entry.catalog, selectedValue);
@@ -566,24 +613,28 @@ function isArtistChoice(itemText) {
 }
 
 function getArtistItemOptions(items) {
-  const musicalItems = items
-    .filter((item) => {
-      const marker = normalizeText(`${item.nome} ${item.textos?.habilidade ?? ""} ${item.textos?.variavel ?? ""} ${item.textos?.descricao ?? ""}`);
-      return item.categoriaId === "instrumento" && (item.id === "instrumento_musical" || marker.includes("instrumento musical") || marker.includes("bardo"));
-    })
-    .map((item) => ({ id: item.id, nome: item.nome }));
-
   return [
     ...items
       .filter((item) => item.id === "estojo_de_disfarces")
       .map((item) => ({ id: item.id, nome: item.nome })),
-    ...musicalItems
+    ...items
+      .filter((item) => item.id === "instrumento_musical")
+      .map((item) => ({ id: item.id, nome: item.nome }))
   ].sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
 function getSimpleOriginItemOptions(itemText, items) {
   const normalized = normalizeText(itemText);
   if (!normalized.includes(" ou ")) return [];
+
+  if (normalized.includes("cao de caca") && normalized.includes("cavalo") && normalized.includes("ponei") && normalized.includes("trobo")) {
+    return [
+      { id: "cao_de_caca", nome: "Cão de caça" },
+      ...items.filter((item) => item.id === "cavalo").map(toOriginItemOption),
+      { id: "ponei", nome: "Pônei" },
+      ...items.filter((item) => item.id === "trobo").map(toOriginItemOption)
+    ];
+  }
 
   if (normalized.includes("arma simples ou marcial de ataque a distancia")) {
     return items
@@ -634,6 +685,26 @@ function toOriginItemOption(item) {
 function isCraftedItemChoice(itemText) {
   const normalized = normalizeText(itemText);
   return normalized.includes("um item") && normalized.includes("fabricar");
+}
+
+function isBudgetItemChoice(itemText) {
+  const normalized = normalizeText(itemText);
+  return normalized.includes("um ou mais itens") && normalized.includes("somando ate");
+}
+
+function getAnyItemCatalog(items, maxPrice) {
+  const availableItems = items
+    .filter((item) => ["arma", "armadura", "escudo", "item_geral"].includes(item.tipo))
+    .filter((item) => !maxPrice || getItemPriceValue(item) <= maxPrice)
+    .map((item) => ({ ...item, price: getItemPriceValue(item) }));
+
+  return {
+    weapons: availableItems.filter((item) => item.tipo === "arma"),
+    armors: availableItems.filter((item) => item.tipo === "armadura"),
+    shields: availableItems.filter((item) => item.tipo === "escudo"),
+    general: availableItems.filter((item) => item.tipo === "item_geral" && GENERAL_ITEM_ALLOWED_CATEGORIES.has(item.categoriaId)),
+    guidance: maxPrice ? `Escolha itens aprovados pelo mestre. Esta seleção registra um item por vez dentro do limite de T$ ${maxPrice}.` : ""
+  };
 }
 
 function getCraftedItemPriceLimit(itemText) {

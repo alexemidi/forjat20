@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  MONTARIAS,
   calcularDanoDesarmado,
   calcularPatamarParaNivel,
   calcularPenalidadesCombateMontado,
@@ -128,9 +129,15 @@ export function DebugPanel({ draft, catalogs }) {
   const defesa      = 10 + (attrs.des ?? 0);
   const cargaMax    = (attrs.for ?? 0) * 5;
   const deslocamento = draft.corpo?.deslocamentoBase ?? 9;
-  const personagemCombate = { ...draft, info: { ...draft.info, racaId: race?.id ?? draft.info.racaId } };
   const empunhadura = normalizarEmpunhadura(draft.combate?.empunhadura);
-  const montaria = normalizarMontaria(draft.corpo?.montaria, race?.id ?? draft.info.racaId, draft.corpo);
+  const autoMount = getAutoMountFromOrigin(draft, origem);
+  const montariaBase = draft.corpo?.montaria?.montado ? draft.corpo.montaria : autoMount ?? draft.corpo?.montaria;
+  const personagemCombate = {
+    ...draft,
+    info: { ...draft.info, racaId: race?.id ?? draft.info.racaId },
+    corpo: { ...draft.corpo, montaria: montariaBase }
+  };
+  const montaria = normalizarMontaria(montariaBase, race?.id ?? draft.info.racaId, draft.corpo);
   const penalidadesMontado = calcularPenalidadesCombateMontado(personagemCombate);
   const beneficiosMontaria = obterBeneficiosMontaria(montaria);
   const danoDesarmado = calcularDanoDesarmado(personagemCombate);
@@ -419,18 +426,27 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = [], origemRegion
       return;
     }
 
+    const fixedOficioId = getDebugInstrumentOficioId(itemText);
+    if (fixedOficioId) {
+      addInstrumentosOficio(fixedOficioId);
+      return;
+    }
+
     if (selectedItemId === "instrumentos_de_oficio") {
       addInstrumentosOficio(selectedOriginItems[`${slotId}:oficio`] || defaultOficioId);
       return;
     }
 
     if (selectedItemId) {
-      addItem(selectedItemId);
+      addItem(selectedItemId, 1, ORIGIN_SPECIAL_ITEM_LABELS[selectedItemId] ?? "");
       return;
     }
 
-    const fixedItem = catalogs.items.find((item) => normalizeDebugText(item.nome) === normalizeDebugText(itemText));
+    if (isDebugBudgetItemChoice(itemText)) return;
+
+    const fixedItem = findDebugItemFromText(itemText, catalogs.items);
     if (fixedItem) addItem(fixedItem.id);
+    else addItem(`origem:${slotId}`, 1, itemText);
   });
 
   (origemRegional?.itens ?? []).forEach((itemText, index) => {
@@ -484,6 +500,34 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = [], origemRegion
 function isDebugOficioInstrumentChoice(itemText) {
   const normalized = normalizeDebugText(itemText);
   return normalized.includes("instrumentos de oficio") && normalized.includes("qualquer");
+}
+
+const ORIGIN_SPECIAL_ITEM_LABELS = {
+  cao_de_caca: "Cão de caça",
+  ponei: "Pônei"
+};
+
+function isDebugBudgetItemChoice(itemText) {
+  const normalized = normalizeDebugText(itemText);
+  return normalized.includes("um ou mais itens") && normalized.includes("somando ate");
+}
+
+function getAutoMountFromOrigin(draft, origem) {
+  const selectedOriginItems = draft.escolhas?.origem?.itens ?? {};
+  const mountId = (origem?.itens ?? [])
+    .map((itemText, index) => {
+      const selectedId = selectedOriginItems[`item_${index}`];
+      return selectedId && MONTARIAS[selectedId] && MONTARIAS[selectedId].tamanhoId === "grande" ? selectedId : "";
+    })
+    .find(Boolean);
+  if (!mountId) return null;
+  return {
+    montado: true,
+    montariaId: mountId,
+    tamanhoId: MONTARIAS[mountId].tamanhoId,
+    nivelMontaria: "iniciante",
+    treinadoEmCavalgar: true
+  };
 }
 
 function getDebugInstrumentOficioId(itemText) {
