@@ -68,6 +68,30 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
     }
   }
 
+  function addBudgetItem(slotId, itemId) {
+    const entry = itemEntries.find((item) => item.id === slotId);
+    const current = getBudgetSelection(selectedItems[slotId]);
+    const item = catalogs.items.find((catalogItem) => catalogItem.id === itemId);
+    if (!entry || !item) return;
+    const nextItem = { id: `${Date.now()}_${current.length}`, itemId, melhoriaIds: [] };
+    const next = [...current, nextItem];
+    if (getBudgetSelectionCost(next, catalogs) > entry.maxPrice) return;
+    updateDraft(`escolhas.origem.itens.${slotId}`, next);
+  }
+
+  function removeBudgetItem(slotId, budgetItemId) {
+    const current = getBudgetSelection(selectedItems[slotId]);
+    updateDraft(`escolhas.origem.itens.${slotId}`, current.filter((item) => item.id !== budgetItemId));
+  }
+
+  function setBudgetItemImprovement(slotId, budgetItemId, melhoriaId) {
+    const entry = itemEntries.find((item) => item.id === slotId);
+    const current = getBudgetSelection(selectedItems[slotId]);
+    const next = current.map((item) => item.id === budgetItemId ? { ...item, melhoriaIds: melhoriaId ? [melhoriaId] : [] } : item);
+    if (entry?.maxPrice && getBudgetSelectionCost(next, catalogs) > entry.maxPrice) return;
+    updateDraft(`escolhas.origem.itens.${slotId}`, next);
+  }
+
   function setOriginOficio(benefit, oficioId) {
     const prefix = `${benefit.id}:`;
     const nextId = `${prefix}${oficioId}`;
@@ -200,6 +224,17 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                         />
                       ) : null}
                     </div>
+                  ) : entry.kind === "budget_items" ? (
+                    <BudgetOriginItemChoice
+                      catalogs={catalogs}
+                      entry={entry}
+                      onAddItem={(itemId) => addBudgetItem(entry.id, itemId)}
+                      onRemoveItem={(budgetItemId) => removeBudgetItem(entry.id, budgetItemId)}
+                      onSetImprovement={(budgetItemId, melhoriaId) => setBudgetItemImprovement(entry.id, budgetItemId, melhoriaId)}
+                      open={openOriginCraftedItem === entry.id}
+                      selected={selectedItems[entry.id]}
+                      setOpen={(open) => setOpenOriginCraftedItem(open ? entry.id : null)}
+                    />
                   ) : entry.kind === "crafted_item" ? (
                     <div className="origin-item-actions">
                       {selectedItems[entry.id] === "instrumentos_de_oficio" ? (
@@ -554,7 +589,7 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
       const maxPrice = getCraftedItemPriceLimit(itemText);
       return {
         id: `item_${index}`,
-        kind: "crafted_item",
+        kind: "budget_items",
         nome: itemText,
         descricao: maxPrice ? `Itens com preço total até T$ ${maxPrice}.` : null,
         maxPrice,
@@ -605,6 +640,114 @@ function formatOriginItemName(entry, selectedValue, selectedItems = {}, defaultI
 
 function formatInstrumentOficioButtonLabel(oficioId) {
   return oficioId ? `Instrumento de of\u00edcio: ${getOficioLabel(oficioId).toLowerCase()}` : "Escolher instrumento de of\u00edcio";
+}
+
+function BudgetOriginItemChoice({ catalogs, entry, selected, open, setOpen, onAddItem, onRemoveItem, onSetImprovement }) {
+  const selectedItems = getBudgetSelection(selected);
+  const used = getBudgetSelectionCost(selectedItems, catalogs);
+  const remaining = Math.max(0, Number(entry.maxPrice ?? 0) - used);
+  const dialogEntry = {
+    ...entry,
+    maxPrice: remaining,
+    catalog: filterBudgetCatalogByRemaining(entry.catalog, remaining)
+  };
+  return (
+    <div className="origin-item-actions">
+      <div className="origin-item-budget">
+        <span>Usado T$ {formatDecimal(used)} de T$ {entry.maxPrice}</span>
+        {selectedItems.map((budgetItem) => {
+          const item = catalogs.items.find((catalogItem) => catalogItem.id === budgetItem.itemId);
+          const selectedImprovementId = budgetItem.melhoriaIds?.[0] ?? "";
+          const compatibleImprovements = getBudgetCompatibleImprovements(item, catalogs.improvements);
+          const improvementNames = (budgetItem.melhoriaIds ?? [])
+            .map((id) => catalogs.improvements.find((improvement) => improvement.id === id)?.nome)
+            .filter(Boolean);
+          return (
+            <div className="origin-item-budget__row" key={budgetItem.id}>
+              <strong>{item?.nome ?? budgetItem.itemId}{improvementNames.length ? ` (${improvementNames.join(", ")})` : ""}</strong>
+              <span>T$ {formatDecimal(getBudgetEntryCost(budgetItem, catalogs))}</span>
+              {compatibleImprovements.length ? (
+                <select onChange={(event) => onSetImprovement(budgetItem.id, event.target.value)} value={selectedImprovementId}>
+                  <option value="">Sem melhoria</option>
+                  {compatibleImprovements.map((improvement) => {
+                    const next = [{ ...budgetItem, melhoriaIds: [improvement.id] }];
+                    const extraCost = getBudgetEntryCost(next[0], catalogs) - getBudgetEntryCost({ ...budgetItem, melhoriaIds: [] }, catalogs);
+                    const disabled = used - getBudgetEntryCost(budgetItem, catalogs) + getBudgetEntryCost(next[0], catalogs) > entry.maxPrice;
+                    return (
+                      <option disabled={disabled} key={improvement.id} value={improvement.id}>
+                        {improvement.nome} (+T$ {formatDecimal(extraCost)})
+                      </option>
+                    );
+                  })}
+                </select>
+              ) : null}
+              <button className="origin-item-select-button" onClick={() => onRemoveItem(budgetItem.id)} type="button">Remover</button>
+            </div>
+          );
+        })}
+      </div>
+      <button className="origin-item-select-button" disabled={remaining <= 0} onClick={() => setOpen(!open)} type="button">
+        Adicionar item
+      </button>
+      {open ? (
+        <OriginCraftedItemDialog
+          currentItemId=""
+          entry={dialogEntry}
+          onClose={() => setOpen(false)}
+          onSelect={(itemId) => {
+            onAddItem(itemId);
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function getBudgetSelection(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function getBudgetSelectionCost(selection, catalogs) {
+  return selection.reduce((total, item) => total + getBudgetEntryCost(item, catalogs), 0);
+}
+
+function getBudgetEntryCost(entry, catalogs) {
+  const item = catalogs.items.find((catalogItem) => catalogItem.id === entry.itemId);
+  const improvementCount = (entry.melhoriaIds ?? []).length;
+  return getItemPriceValue(item) + getImprovementPrice(improvementCount);
+}
+
+function getImprovementPrice(count) {
+  const prices = { 0: 0, 1: 300, 2: 3000, 3: 9000, 4: 18000 };
+  return prices[count] ?? Number.POSITIVE_INFINITY;
+}
+
+function filterBudgetCatalogByRemaining(catalog, remaining) {
+  const filterItems = (items = []) => items.filter((item) => getItemPriceValue(item) <= remaining);
+  return {
+    ...catalog,
+    weapons: filterItems(catalog?.weapons),
+    armors: filterItems(catalog?.armors),
+    shields: filterItems(catalog?.shields),
+    general: filterItems(catalog?.general),
+    guidance: `${catalog?.guidance ?? ""} Restante: T$ ${formatDecimal(remaining)}.`
+  };
+}
+
+function getBudgetCompatibleImprovements(item, improvements) {
+  const category = getSuperiorItemCategory(item);
+  if (!category) return [];
+  return (improvements ?? [])
+    .filter((improvement) => improvement.categoriasIds?.includes(category))
+    .filter((improvement) => improvement.id !== "material_especial")
+    .filter((improvement) => !(improvement.preRequisitos ?? []).length)
+    .sort((a, b) => a.nome.localeCompare(b.nome));
+}
+
+function getSuperiorItemCategory(item) {
+  if (["arma", "armadura", "escudo"].includes(item?.tipo)) return item.tipo;
+  if (item?.tipo === "item_geral" && ["esoterico", "ferramenta", "vestuario"].includes(item.categoriaId)) return item.categoriaId;
+  return "";
 }
 
 function isArtistChoice(itemText) {

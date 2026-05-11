@@ -864,6 +864,27 @@
   position: relative;
 }
 
+.origin-item-budget {
+  display: grid;
+  gap: 8px;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.origin-item-budget__row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(150px, 1fr) auto;
+  min-width: 0;
+}
+
+.origin-item-budget__row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .origin-item-select-button {
   background: #fffdfa;
   border: 1px solid #cfc4bd;

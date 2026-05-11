@@ -189,7 +189,11 @@ function getSelectedPrototypeImprovementIds(draft) {
     ? itemSuperior.melhoriaIds.filter(Boolean)
     : itemSuperior.melhoriaId ? [itemSuperior.melhoriaId] : [];
   const regionalIds = Object.values(draft.escolhas?.origemRegional?.melhorias ?? {}).filter(Boolean);
-  return [...prototypeIds, ...regionalIds];
+  const originBudgetIds = Object.values(draft.escolhas?.origem?.itens ?? {})
+    .filter(Array.isArray)
+    .flatMap((items) => items.flatMap((item) => item.melhoriaIds ?? []))
+    .filter(Boolean);
+  return [...prototypeIds, ...regionalIds, ...originBudgetIds];
 }
 
 function getPericiasOrigemSelecionadas(escolhasOrigem = {}) {

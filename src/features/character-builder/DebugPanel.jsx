@@ -421,6 +421,13 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = [], origemRegion
     const slotId = `item_${index}`;
     const selectedItemId = selectedOriginItems[slotId];
 
+    if (Array.isArray(selectedItemId)) {
+      selectedItemId.forEach((entry) => {
+        addItem(entry.itemId, 1, getDebugBudgetItemName(entry, catalogs), entry.melhoriaIds ?? []);
+      });
+      return;
+    }
+
     if (isDebugOficioInstrumentChoice(itemText)) {
       addInstrumentosOficio(selectedItemId || defaultOficioId);
       return;
@@ -558,6 +565,14 @@ function getDebugSuperiorItemName(itemId, itemText, catalogs, improvementId = ""
   const improvement = catalogs.improvements.find((entry) => entry.id === improvementId);
   const suffix = improvement ? `, ${improvement.nome}` : "";
   return item ? `${item.nome} (Superior${suffix})` : "";
+}
+
+function getDebugBudgetItemName(entry, catalogs) {
+  const item = catalogs.items.find((catalogItem) => catalogItem.id === entry.itemId);
+  const improvements = (entry.melhoriaIds ?? [])
+    .map((id) => catalogs.improvements.find((improvement) => improvement.id === id)?.nome)
+    .filter(Boolean);
+  return item && improvements.length ? `${item.nome} (${improvements.join(", ")})` : "";
 }
 
 function coletarProficienciasOrigemRegional(origemRegional) {
