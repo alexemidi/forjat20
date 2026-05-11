@@ -264,6 +264,7 @@ export function ClassStep({ catalogs, draft, updateDraft }) {
             <ClassGrantedSkills
               fixedEntries={selectedClass.caracteristicas?.pericias?.fixas ?? []}
               classChoices={classChoices}
+              grantedSkillIds={periciasInfo.classChoiceGrantedSkills}
               trainedIds={periciasInfo.treinadas}
               selectedOficios={periciasInfo.selectedOficios}
               onFixedChoice={setFixedChoice}
@@ -707,6 +708,10 @@ function toggleChoiceArray(current, optionId, limit) {
 }
 
 function formatClassChoiceLabel(value) {
+  const directLabels = {
+    transmutacao: "Transmutação"
+  };
+  if (directLabels[value]) return directLabels[value];
   const normalized = String(value ?? "").replace(/^oficio_/, "Ofício ");
   return normalized
     .split("_")
@@ -1417,10 +1422,12 @@ const PROTOTYPE_GENERAL_LABELS = {
   alquimico_venenoso: "Venenos"
 };
 
-function ClassGrantedSkills({ fixedEntries, classChoices, trainedIds, selectedOficios = [], onFixedChoice, onSetOficio }) {
+function ClassGrantedSkills({ fixedEntries, classChoices, grantedSkillIds = [], trainedIds, selectedOficios = [], onFixedChoice, onSetOficio }) {
   const [openOficioSlot, setOpenOficioSlot] = useState(null);
   const [oficioAnchor, setOficioAnchor] = useState(null);
-  if (!fixedEntries.length) return null;
+  const fixedSkillIds = new Set(fixedEntries.map((entry) => entry.id).filter(Boolean));
+  const grantedSkills = [...new Set(grantedSkillIds)].filter((periciaId) => periciaId !== "oficio" && !fixedSkillIds.has(periciaId));
+  if (!fixedEntries.length && !grantedSkills.length) return null;
 
   return (
     <div className="class-granted-skills">
@@ -1464,6 +1471,16 @@ function ClassGrantedSkills({ fixedEntries, classChoices, trainedIds, selectedOf
             </button>
           );
         })}
+        {grantedSkills.map((periciaId) => (
+          <button
+            className="choice-button choice-button--active"
+            disabled
+            key={`granted-${periciaId}`}
+            type="button"
+          >
+            {nomePericia(periciaId)}
+          </button>
+        ))}
       </div>
       {openOficioSlot ? (
         <OficioPopover
@@ -1844,6 +1861,7 @@ function calcularPericias(classe, race, raceChoices, classChoices, attrs, nivel)
     selectedClassSkills,
     selectedIntSkills,
     selectedOficios,
+    classChoiceGrantedSkills,
     classChoiceOptions,
     intChoiceOptions,
     raceChoiceOptions,
