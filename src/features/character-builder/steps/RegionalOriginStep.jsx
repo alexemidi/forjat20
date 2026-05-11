@@ -137,6 +137,23 @@ export function RegionalOriginStep({ catalogs, draft, updateDraft }) {
                         />
                       ) : null}
                     </div>
+                  ) : entry.kind === "shop_item" ? (
+                    <div className="origin-item-actions">
+                      <button className="origin-item-select-button" onClick={() => setOpenItem(openItem === entry.id ? null : entry.id)} type="button">
+                        {selectedItems[entry.id] ? "Trocar item" : "Escolher item"}
+                      </button>
+                      {openItem === entry.id ? (
+                        <OriginCraftedItemDialog
+                          currentItemId={selectedItems[entry.id] ?? ""}
+                          entry={entry}
+                          onClose={() => setOpenItem(null)}
+                          onSelect={(itemId) => {
+                            setRegionalItem(entry.id, itemId);
+                            setOpenItem(null);
+                          }}
+                        />
+                      ) : null}
+                    </div>
                   ) : entry.options?.length ? (
                     <select onChange={(event) => setRegionalItem(entry.id, event.target.value)} value={selectedItems[entry.id] ?? ""}>
                       <option value="">Escolha</option>
@@ -323,6 +340,8 @@ function getRegionalItemEntries(origin, items, improvements) {
         interactive: true
       };
     }
+    const shopEntry = getRegionalShopEntry(text, items);
+    if (shopEntry) return { id, ...shopEntry, interactive: true };
     const options = getRegionalItemOptions(text, items);
     if (options.length > 1) return { id, nome: text, descricao: "Escolha uma das opções recebidas.", options, quantity, interactive: true };
     const fixedItem = options[0] ?? findFixedItemFromText(text, items);
@@ -342,6 +361,68 @@ function getRegionalSuperiorCatalog(items, improvements, fixedItem) {
     general: [],
     guidance: "Escolha o item superior. Melhorias de material especial ficam fora desta escolha."
   };
+}
+
+function getRegionalShopEntry(text, items) {
+  const normalized = normalizeText(text);
+  const maxPrice = extractPriceLimit(text);
+  if ((normalized.includes("presente de despedida") || normalized.includes("item qualquer")) && maxPrice) {
+    return {
+      kind: "shop_item",
+      nome: text,
+      descricao: `Escolha qualquer item com preço até T$ ${maxPrice}.`,
+      maxPrice,
+      catalog: getAnyRegionalItemCatalog(items, maxPrice)
+    };
+  }
+  const weaponCatalog = getRegionalWeaponCatalog(text, items);
+  if (!weaponCatalog) return null;
+  return {
+    kind: "shop_item",
+    nome: text,
+    descricao: weaponCatalog.guidance,
+    maxPrice: null,
+    catalog: weaponCatalog
+  };
+}
+
+function getAnyRegionalItemCatalog(items, maxPrice) {
+  const available = items
+    .filter((item) => ["arma", "armadura", "escudo", "item_geral"].includes(item.tipo))
+    .filter((item) => !maxPrice || getItemPriceValue(item) <= maxPrice)
+    .map((item) => ({ ...item, price: getItemPriceValue(item) }));
+  return {
+    weapons: available.filter((item) => item.tipo === "arma"),
+    armors: available.filter((item) => item.tipo === "armadura"),
+    shields: available.filter((item) => item.tipo === "escudo"),
+    general: available.filter((item) => item.tipo === "item_geral"),
+    guidance: maxPrice ? `Escolha qualquer item com preço até T$ ${maxPrice}.` : "Escolha um item."
+  };
+}
+
+function getRegionalWeaponCatalog(text, items) {
+  const normalized = normalizeText(text);
+  const categories = [];
+  if (normalized.includes("arma simples")) categories.push("simples");
+  if (normalized.includes("arma marcial")) categories.push("marcial");
+  if (normalized.includes("exotica")) categories.push("exotica");
+  if (!categories.length) return null;
+  const weapons = items
+    .filter((item) => item.tipo === "arma" && categories.includes(item.categoriaId))
+    .map((item) => ({ ...item, price: getItemPriceValue(item) }));
+  if (!weapons.length) return null;
+  return {
+    weapons,
+    armors: [],
+    shields: [],
+    general: [],
+    guidance: `Escolha ${formatRegionalWeaponGuidance(categories)}.`
+  };
+}
+
+function formatRegionalWeaponGuidance(categories) {
+  const labels = categories.map((category) => ({ simples: "uma arma simples", marcial: "uma arma marcial", exotica: "uma arma exótica" })[category] ?? category);
+  return labels.length === 1 ? labels[0] : `${labels.slice(0, -1).join(", ")} ou ${labels.at(-1)}`;
 }
 
 function getCompatibleImprovements(item, improvements) {
@@ -364,9 +445,6 @@ function isSpecialMaterialImprovement(improvement) {
 
 function getRegionalItemOptions(text, items) {
   const normalized = normalizeText(text);
-  if (normalized.includes("arma simples ou marcial")) return items.filter((item) => item.tipo === "arma" && ["simples", "marcial"].includes(item.categoriaId)).map(toItemOption);
-  if (normalized.includes("arma simples")) return items.filter((item) => item.tipo === "arma" && item.categoriaId === "simples").map(toItemOption);
-  if (normalized.includes("arma marcial")) return items.filter((item) => item.tipo === "arma" && item.categoriaId === "marcial").map(toItemOption);
   if (normalized.includes("escudo leve ou pesado")) return items.filter((item) => item.tipo === "escudo").map(toItemOption);
   if (normalized.includes("cota de malha ou escudo pesado")) return ["cota_de_malha", "escudo_pesado"].map((id) => items.find((item) => item.id === id)).filter(Boolean).map(toItemOption);
   if (normalized.includes("arco longo ou katana")) return ["arco_longo", "katana"].map((id) => items.find((item) => item.id === id)).filter(Boolean).map(toItemOption);
@@ -384,6 +462,15 @@ function formatRegionalItemName(entry, selectedValue) {
   if (selectedValue && entry.kind === "superior_item") {
     const item = [...(entry.catalog?.weapons ?? []), ...(entry.catalog?.armors ?? []), ...(entry.catalog?.shields ?? [])].find((option) => option.id === selectedValue);
     return item ? `${item.nome} superior` : entry.nome;
+  }
+  if (selectedValue && entry.kind === "shop_item") {
+    const item = [
+      ...(entry.catalog?.weapons ?? []),
+      ...(entry.catalog?.armors ?? []),
+      ...(entry.catalog?.shields ?? []),
+      ...(entry.catalog?.general ?? [])
+    ].find((option) => option.id === selectedValue);
+    return item?.nome ?? entry.nome;
   }
   return entry.nome;
 }
@@ -442,6 +529,11 @@ function extractInstrumentOficio(text) {
 function extractQuantity(text) {
   const match = normalizeText(text).match(/\bx\s*(\d+)\b/);
   return match ? Number(match[1]) : 1;
+}
+
+function extractPriceLimit(text) {
+  const match = normalizeText(text).match(/t\$\s*(\d+)/);
+  return match ? Number(match[1]) : null;
 }
 
 function isSuperiorItemText(text) {

@@ -101,7 +101,7 @@ export function DebugPanel({ draft, catalogs }) {
   const patamarId   = calcularPatamarParaNivel(nivel);
   const raceChoices = draft.escolhas.raca ?? {};
 
-  const attrs = calcularAtributosComEscolhas(draft.atributosBase, race, raceChoices);
+  const attrs = aplicarBonusAtributosOrigem(calcularAtributosComEscolhas(draft.atributosBase, race, raceChoices), draft, origem);
   const magiaInfo = calcularInfoMagiaPersonagem(draft, classe, attrs);
 
   // PV / PM
@@ -328,7 +328,7 @@ export function DebugPanel({ draft, catalogs }) {
                 <span>{p.atributo.toUpperCase()}</span>
                 <span>{p.bloqueada ? "X" : plainNumber(p.bonusNivel)}</span>
                 <span>{plainNumber(p.bonusGeral)}</span>
-                <span>{plainNumber(p.total)}</span>
+                <span>{p.bloqueada ? "X" : plainNumber(p.total)}</span>
               </div>
             ))}
           </div>
@@ -592,6 +592,14 @@ function coletarProficienciasOrigemRegional(origemRegional) {
 function getDebugPrototypeImprovementIds(itemSuperior) {
   if (Array.isArray(itemSuperior?.melhoriaIds)) return itemSuperior.melhoriaIds.filter(Boolean);
   return itemSuperior?.melhoriaId ? [itemSuperior.melhoriaId] : [];
+}
+
+function aplicarBonusAtributosOrigem(attrs, draft, origem) {
+  const result = { ...attrs };
+  if (normalizeDebugText(origem?.nome) === "forasteiro" && draft.escolhas?.origem?.aprovacoes?.forasteiroCarisma) {
+    result.car = Number(result.car ?? 0) + 1;
+  }
+  return result;
 }
 
 function capitalizeDebugLabel(value) {

@@ -72,6 +72,10 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
     }
   }
 
+  function setOriginApproval(key, value) {
+    updateDraft(`escolhas.origem.aprovacoes.${key}`, value);
+  }
+
   function addBudgetItem(slotId, itemId) {
     const entry = itemEntries.find((item) => item.id === slotId);
     const current = getBudgetSelection(selectedItems[slotId]);
@@ -301,8 +305,55 @@ export function OriginStep({ catalogs, draft, updateDraft }) {
                         />
                       ) : null}
                     </div>
+                  ) : entry.kind === "approval_forasteiro_car" ? (
+                    <div className="origin-item-actions">
+                      <button
+                        className={`origin-item-select-button${draft.escolhas.origem?.aprovacoes?.forasteiroCarisma ? " choice-button--active" : ""}`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setOriginApproval("forasteiroCarisma", true);
+                        }}
+                        type="button"
+                      >
+                        Aprovado: +1 Carisma
+                      </button>
+                      <button
+                        className={`origin-item-select-button${draft.escolhas.origem?.aprovacoes?.forasteiroCarisma === false ? " choice-button--active" : ""}`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setOriginApproval("forasteiroCarisma", false);
+                        }}
+                        type="button"
+                      >
+                        Não aprovado
+                      </button>
+                    </div>
                   ) : entry.options?.length && entry.options.length <= 4 ? (
                     <div className="origin-item-actions">
+                      {selectedItems[entry.id] === "instrumentos_de_oficio" ? (
+                        <>
+                          <button
+                            className="origin-item-select-button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setOpenOriginItemOficio(openOriginItemOficio === `${entry.id}:oficio` ? null : `${entry.id}:oficio`);
+                            }}
+                            type="button"
+                          >
+                            {formatInstrumentOficioButtonLabel(selectedItems[`${entry.id}:oficio`] || defaultInstrumentOficioId)}
+                          </button>
+                          {openOriginItemOficio === `${entry.id}:oficio` ? (
+                            <OriginOficioPopover
+                              currentOficioId={selectedItems[`${entry.id}:oficio`] || defaultInstrumentOficioId}
+                              onClose={() => setOpenOriginItemOficio(null)}
+                              onSelect={(oficioId) => {
+                                setOriginItem(`${entry.id}:oficio`, oficioId);
+                                setOpenOriginItemOficio(null);
+                              }}
+                            />
+                          ) : null}
+                        </>
+                      ) : null}
                       {entry.options.map((option) => (
                         <button
                           className={`origin-item-select-button${selectedItems[entry.id] === option.id ? " choice-button--active" : ""}`}
@@ -611,6 +662,15 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
         options: getArtistItemOptions(items)
       };
     }
+    if (isForasteiroCharismaApproval(itemText)) {
+      return {
+        id: `item_${index}`,
+        kind: "approval_forasteiro_car",
+        nome: "Instrumento musical exótico",
+        descricao: "Bônus de +1 em Carisma se aprovado pelo mestre.",
+        options: []
+      };
+    }
     if (isBookCollectionChoice(itemText)) {
       return {
         id: `item_${index}`,
@@ -632,6 +692,52 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
         maxPrice: null,
         catalog: getRangedSimpleOrMartialWeaponCatalog(items),
         options: []
+      };
+    }
+    const weaponChoiceCatalog = getWeaponChoiceCatalog(itemText, items);
+    if (weaponChoiceCatalog) {
+      return {
+        id: `item_${index}`,
+        kind: "crafted_item",
+        nome: itemText,
+        descricao: weaponChoiceCatalog.guidance,
+        maxPrice: null,
+        catalog: weaponChoiceCatalog,
+        options: []
+      };
+    }
+    if (isAnyItemUnderPriceChoice(itemText)) {
+      const maxPrice = getCraftedItemPriceLimit(itemText);
+      return {
+        id: `item_${index}`,
+        kind: "crafted_item",
+        nome: itemText,
+        descricao: `Escolha qualquer item com preço até T$ ${maxPrice}.`,
+        maxPrice,
+        catalog: getAnyItemCatalog(items, maxPrice),
+        options: []
+      };
+    }
+    if (isHeroPeasantToolOrSimpleWeaponChoice(itemText)) {
+      return {
+        id: `item_${index}`,
+        kind: "crafted_item",
+        nome: itemText,
+        descricao: "Escolha instrumentos de ofício ou uma arma simples.",
+        maxPrice: null,
+        catalog: getInstrumentOrSimpleWeaponCatalog(items),
+        options: []
+      };
+    }
+    if (isWorkerHeavyToolChoice(itemText)) {
+      return {
+        id: `item_${index}`,
+        nome: "Ferramenta pesada",
+        descricao: "Escolha as estatísticas usadas pela ferramenta.",
+        options: [
+          { id: "ferramenta_pesada", nome: "Ferramenta Pesada (maça: 1d8, x2, impacto)" },
+          { id: "ferramenta_pesada_lanca", nome: "Ferramenta Pesada (lança: 1d6, x2, perfuração, arremesso)" }
+        ]
       };
     }
     const simpleOptions = getSimpleOriginItemOptions(itemText, items);
@@ -830,6 +936,11 @@ function isBookCollectionChoice(itemText) {
   return normalized.includes("colecao de livros") && normalized.includes("guerra") && normalized.includes("misticismo") && normalized.includes("nobreza");
 }
 
+function isForasteiroCharismaApproval(itemText) {
+  const normalized = normalizeText(itemText);
+  return normalized.includes("instrumento musical exotico") && normalized.includes("pericia de carisma") && normalized.includes("mestre");
+}
+
 function getArtistItemOptions(items) {
   return [
     ...items
@@ -862,6 +973,63 @@ function getRangedSimpleOrMartialWeaponCatalog(items) {
     general: [],
     guidance: "Escolha uma arma simples ou marcial de ataque à distância."
   };
+}
+
+function getWeaponChoiceCatalog(itemText, items) {
+  const normalized = normalizeText(itemText);
+  if (normalized.includes("instrumentos de oficio")) return null;
+  const categories = [];
+  if (normalized.includes("arma simples")) categories.push("simples");
+  if (normalized.includes("arma marcial")) categories.push("marcial");
+  if (normalized.includes("exotica")) categories.push("exotica");
+  if (!categories.length) return null;
+  const weapons = items
+    .filter((item) => item.tipo === "arma" && categories.includes(item.categoriaId))
+    .filter((item) => !normalized.includes("corpo a corpo") || item.arma?.combateId === "corpo_a_corpo")
+    .map((item) => ({ ...item, price: getItemPriceValue(item) }));
+  if (!weapons.length) return null;
+  return {
+    weapons,
+    armors: [],
+    shields: [],
+    general: [],
+    guidance: `Escolha ${formatWeaponChoiceGuidance(categories)}.`
+  };
+}
+
+function formatWeaponChoiceGuidance(categories) {
+  const labels = categories.map((category) => ({
+    simples: "uma arma simples",
+    marcial: "uma arma marcial",
+    exotica: "uma arma exótica"
+  })[category] ?? category);
+  return labels.length === 1 ? labels[0] : labels.slice(0, -1).join(", ") + " ou " + labels.at(-1);
+}
+
+function isAnyItemUnderPriceChoice(itemText) {
+  const normalized = normalizeText(itemText);
+  return normalized.includes("item") && normalized.includes("ate t$") && !normalized.includes("fabricar") && !normalized.includes("somando");
+}
+
+function isHeroPeasantToolOrSimpleWeaponChoice(itemText) {
+  const normalized = normalizeText(itemText);
+  return normalized.includes("instrumentos de oficio ou uma arma simples");
+}
+
+function getInstrumentOrSimpleWeaponCatalog(items) {
+  const instrumentos = items.find((item) => item.id === "instrumentos_de_oficio");
+  return {
+    weapons: items.filter((item) => item.tipo === "arma" && item.categoriaId === "simples").map((item) => ({ ...item, price: getItemPriceValue(item) })),
+    armors: [],
+    shields: [],
+    general: instrumentos ? [{ ...instrumentos, price: getItemPriceValue(instrumentos) }] : [],
+    guidance: "Escolha instrumentos de ofício ou uma arma simples."
+  };
+}
+
+function isWorkerHeavyToolChoice(itemText) {
+  const normalized = normalizeText(itemText);
+  return normalized.includes("ferramenta pesada") && normalized.includes("maca ou lanca");
 }
 
 function getSimpleOriginItemOptions(itemText, items) {

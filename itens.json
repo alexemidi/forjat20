@@ -229,6 +229,102 @@
       ]
     },
     {
+      "id": "rolo_de_macarrao",
+      "nome": "Rolo de Macarrão",
+      "tipo": "arma",
+      "categoriaId": "simples",
+      "livroOrigemId": "basico",
+      "preco": {
+        "valor": 0,
+        "moeda": "T$"
+      },
+      "espacos": 1,
+      "equipamento": {
+        "equipavel": true,
+        "slotsPermitidos": [
+          "mao_direita",
+          "mao_esquerda"
+        ],
+        "ocupaMao": true,
+        "itemVestido": false
+      },
+      "textos": {
+        "habilidade": "Mesmas estatísticas de uma clava.",
+        "variavel": "",
+        "descricao": "Utensílio de cozinha usado como arma improvisada, recebido por algumas origens."
+      },
+      "arma": {
+        "combateId": "corpo_a_corpo",
+        "empunhaduraId": "uma_mao",
+        "dano": {
+          "principal": "1d6",
+          "alternativas": []
+        },
+        "critico": {
+          "margem": 20,
+          "multiplicador": 2
+        },
+        "alcanceId": null,
+        "tipoDanoIds": [
+          "impacto"
+        ],
+        "propriedadesIds": [],
+        "gruposArmaIds": []
+      },
+      "efeitos": [],
+      "livrosOrigemIds": [
+        "basico"
+      ]
+    },
+    {
+      "id": "martelo_de_carne",
+      "nome": "Martelo de Carne",
+      "tipo": "arma",
+      "categoriaId": "simples",
+      "livroOrigemId": "basico",
+      "preco": {
+        "valor": 0,
+        "moeda": "T$"
+      },
+      "espacos": 1,
+      "equipamento": {
+        "equipavel": true,
+        "slotsPermitidos": [
+          "mao_direita",
+          "mao_esquerda"
+        ],
+        "ocupaMao": true,
+        "itemVestido": false
+      },
+      "textos": {
+        "habilidade": "Mesmas estatísticas de uma clava.",
+        "variavel": "",
+        "descricao": "Utensílio de cozinha usado como arma improvisada, recebido por algumas origens."
+      },
+      "arma": {
+        "combateId": "corpo_a_corpo",
+        "empunhaduraId": "uma_mao",
+        "dano": {
+          "principal": "1d6",
+          "alternativas": []
+        },
+        "critico": {
+          "margem": 20,
+          "multiplicador": 2
+        },
+        "alcanceId": null,
+        "tipoDanoIds": [
+          "impacto"
+        ],
+        "propriedadesIds": [],
+        "gruposArmaIds": []
+      },
+      "efeitos": [],
+      "livrosOrigemIds": [
+        "basico"
+      ]
+    },
+    {
       "id": "lanca",
       "nome": "Lança",
       "tipo": "arma",
@@ -422,6 +518,58 @@
         ],
         "propriedadesIds": [],
         "gruposArmaIds": []
+      },
+      "efeitos": [],
+      "livrosOrigemIds": [
+        "basico"
+      ]
+    },
+    {
+      "id": "ferramenta_pesada_lanca",
+      "nome": "Ferramenta Pesada",
+      "tipo": "arma",
+      "categoriaId": "simples",
+      "livroOrigemId": "basico",
+      "preco": {
+        "valor": 2,
+        "moeda": "T$"
+      },
+      "espacos": 1,
+      "equipamento": {
+        "equipavel": true,
+        "slotsPermitidos": [
+          "mao_direita",
+          "mao_esquerda"
+        ],
+        "ocupaMao": true,
+        "itemVestido": false
+      },
+      "textos": {
+        "habilidade": "Mesmas estatísticas de uma lança.",
+        "variavel": "",
+        "descricao": "Ferramenta pesada usada como arma improvisada, recebida por algumas origens."
+      },
+      "arma": {
+        "combateId": "corpo_a_corpo",
+        "empunhaduraId": "uma_mao",
+        "dano": {
+          "principal": "1d6",
+          "alternativas": []
+        },
+        "critico": {
+          "margem": 20,
+          "multiplicador": 2
+        },
+        "alcanceId": "curto",
+        "tipoDanoIds": [
+          "perfuracao"
+        ],
+        "propriedadesIds": [
+          "arremesso"
+        ],
+        "gruposArmaIds": [
+          "armas_marinhas"
+        ]
       },
       "efeitos": [],
       "livrosOrigemIds": [

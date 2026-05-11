@@ -33,12 +33,12 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const race = options.race ?? catalogs.races.find((raca) => raca.id === draft.info.racaId);
   const classe = options.classe ?? catalogs.classes.find((item) => item.id === draft.info.classeId);
   const raceChoices = options.raceChoices ?? draft.escolhas.raca ?? {};
-  const attrs = options.attrs ?? calcularAtributosComEscolhas(draft.atributosBase, race, raceChoices);
+  const origem = catalogs.origins?.find((origin) => (origin.id ?? origin.nome) === draft.info.origemId);
+  const attrs = options.attrs ?? aplicarBonusAtributosOrigem(calcularAtributosComEscolhas(draft.atributosBase, race, raceChoices), draft, origem);
   const nivel = Number(draft.info.nivel ?? 1);
   const escolhasClasse = draft.escolhas.classe ?? {};
   const escolhasOrigem = draft.escolhas.origem ?? {};
   const escolhasOrigemRegional = draft.escolhas.origemRegional ?? {};
-  const origem = catalogs.origins?.find((origin) => (origin.id ?? origin.nome) === draft.info.origemId);
   const origemRegional = catalogs.regionalOrigins?.find((origin) => (origin.id ?? origin.nome) === draft.info.origemRegionalId);
   const bonusNivelPericia = calcularBonusNivelPericia(nivel);
   const bonusTamanhoFurtividade = Number(options.bonusTamanhoFurtividade ?? 0);
@@ -248,6 +248,14 @@ function getSkillBonusFromOriginItemChoice(value) {
   const id = String(value ?? "");
   if (!id.startsWith("colecao_de_livros:")) return "";
   return normalizarPericiaId(id.split(":").at(-1));
+}
+
+function aplicarBonusAtributosOrigem(attrs, draft, origem) {
+  const result = { ...attrs };
+  if (normalizarPericiaId(origem?.nome) === "forasteiro" && draft.escolhas?.origem?.aprovacoes?.forasteiroCarisma) {
+    result.car = Number(result.car ?? 0) + 1;
+  }
+  return result;
 }
 
 function getPericiasConsideradasTreinadasRegionais(origemRegional) {
