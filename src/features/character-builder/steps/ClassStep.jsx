@@ -813,6 +813,7 @@ function ResourceCard({ label, value, formula, extra }) {
 
 const PROTOTYPE_PRICE_LIMIT = 500;
 const PROTOTYPE_BASE_ITEM_LIMIT = 200;
+const PROTOTYPE_ALCHEMY_QUANTITY_LIMIT = 10;
 const IMPROVEMENT_PRICE_BY_COUNT = {
   1: 300,
   2: 3000,
@@ -824,18 +825,18 @@ const PROTOTYPE_SHOP_GENERAL_CATEGORIES = new Set([
   "equipamento_aventura",
   "ferramenta",
   "vestuario",
-  "esoterico",
-  "alquimico_preparado",
-  "alquimico_catalisador",
-  "alquimico_venenoso"
+  "esoterico"
 ]);
 
 function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
   const [openSuperiorShop, setOpenSuperiorShop] = useState(false);
   const [openImprovementShop, setOpenImprovementShop] = useState(false);
+  const [openAlchemyShop, setOpenAlchemyShop] = useState(false);
   const choice = classChoices.prototipo ?? {};
   const selectedSuperior = choice.itemSuperior ?? {};
+  const selectedAlchemy = getPrototypeAlchemySelection(choice.alquimicos);
   const shopItems = getPrototypeShopItems(catalogs.items);
+  const alchemyItems = getPrototypeAlchemyItems(catalogs.items);
   const selectedItem = shopItems.find((item) => item.id === selectedSuperior.itemId);
   const improvementOptions = selectedItem ? getCompatiblePrototypeImprovements(selectedItem, catalogs.improvements) : [];
   const selectedImprovementIds = getPrototypeImprovementIds(selectedSuperior)
@@ -845,6 +846,10 @@ function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
     .filter(Boolean);
   const selectedImprovementLabel = formatPrototypeImprovementsSummary(selectedImprovements);
   const selectedImprovementCount = selectedImprovementIds.length;
+  const alchemyUsedPrice = getPrototypeAlchemySelectionPrice(selectedAlchemy, catalogs.items);
+  const alchemyUsedQuantity = getPrototypeAlchemySelectionQuantity(selectedAlchemy);
+  const alchemyRemainingPrice = Math.max(0, PROTOTYPE_PRICE_LIMIT - alchemyUsedPrice);
+  const alchemyRemainingQuantity = Math.max(0, PROTOTYPE_ALCHEMY_QUANTITY_LIMIT - alchemyUsedQuantity);
 
   function setSuperiorItem(itemId) {
     updateDraft("escolhas.classe.prototipo", {
@@ -854,6 +859,38 @@ function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
     });
     setOpenSuperiorShop(false);
     setOpenImprovementShop(false);
+    setOpenAlchemyShop(false);
+  }
+
+  function addAlchemyItem(itemId) {
+    const item = catalogs.items.find((catalogItem) => catalogItem.id === itemId);
+    if (!item) return;
+    if (alchemyUsedQuantity + 1 > PROTOTYPE_ALCHEMY_QUANTITY_LIMIT) return;
+    if (alchemyUsedPrice + getItemPrice(item) > PROTOTYPE_PRICE_LIMIT) return;
+    const current = getPrototypeAlchemySelection(choice.alquimicos);
+    const existing = current.find((entry) => entry.itemId === itemId);
+    const next = existing
+      ? current.map((entry) => entry.itemId === itemId ? { ...entry, quantidade: Number(entry.quantidade ?? 1) + 1 } : entry)
+      : [...current, { itemId, quantidade: 1 }];
+    updateDraft("escolhas.classe.prototipo", {
+      modo: "alquimicos",
+      itemSuperior: { itemId: "", melhoriaId: "", melhoriaIds: [] },
+      alquimicos: next
+    });
+    setOpenSuperiorShop(false);
+    setOpenImprovementShop(false);
+  }
+
+  function removeAlchemyItem(itemId) {
+    const current = getPrototypeAlchemySelection(choice.alquimicos);
+    const next = current
+      .map((entry) => entry.itemId === itemId ? { ...entry, quantidade: Number(entry.quantidade ?? 1) - 1 } : entry)
+      .filter((entry) => Number(entry.quantidade ?? 0) > 0);
+    updateDraft("escolhas.classe.prototipo", {
+      modo: next.length ? "alquimicos" : "",
+      itemSuperior: { itemId: "", melhoriaId: "", melhoriaIds: [] },
+      alquimicos: next
+    });
   }
 
   function toggleSuperiorImprovement(melhoriaId) {
@@ -922,6 +959,46 @@ function InventorPrototypeChoice({ catalogs, classChoices, updateDraft }) {
               />
             ) : null}
           </>
+        </div>
+        <div className={`origin-item-row class-prototype-row${openAlchemyShop ? " origin-item-row--active" : ""}`}>
+          <div>
+            <strong>10 itens alquímicos de até T$ 500</strong>
+            <span>{alchemyUsedQuantity}/{PROTOTYPE_ALCHEMY_QUANTITY_LIMIT} unidades | T$ {formatPrototypeNumber(alchemyUsedPrice)} de T$ {PROTOTYPE_PRICE_LIMIT}</span>
+            {selectedAlchemy.length ? (
+              <div className="origin-item-budget">
+                {selectedAlchemy.map((entry) => {
+                  const item = catalogs.items.find((catalogItem) => catalogItem.id === entry.itemId);
+                  const quantidade = Number(entry.quantidade ?? 1);
+                  return (
+                    <div className="origin-item-budget__row" key={entry.itemId}>
+                      <strong>{item?.nome ?? entry.itemId} x{quantidade}</strong>
+                      <span>T$ {formatPrototypeNumber(getItemPrice(item) * quantidade)}</span>
+                      <button className="origin-item-select-button" onClick={() => removeAlchemyItem(entry.itemId)} type="button">Remover 1</button>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+          <button
+            className="origin-item-select-button"
+            disabled={alchemyRemainingPrice <= 0 || alchemyRemainingQuantity <= 0}
+            onClick={(event) => {
+              event.stopPropagation();
+              setOpenAlchemyShop((open) => !open);
+            }}
+            type="button"
+          >
+            Escolher alquímico
+          </button>
+          {openAlchemyShop ? (
+            <PrototypeAlchemyShop
+              items={alchemyItems.filter((item) => getItemPrice(item) <= alchemyRemainingPrice)}
+              onClose={() => setOpenAlchemyShop(false)}
+              onSelect={addAlchemyItem}
+              selectedItemIds={selectedAlchemy.map((entry) => entry.itemId)}
+            />
+          ) : null}
         </div>
       </div>
     </div>
@@ -1015,6 +1092,30 @@ function getPrototypeAlchemyItems(items) {
     .sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
+function getPrototypeAlchemySelection(value) {
+  if (!Array.isArray(value)) return [];
+  const entries = value.map((entry) => typeof entry === "string" ? { itemId: entry, quantidade: 1 } : entry)
+    .filter((entry) => entry?.itemId)
+    .map((entry) => ({ itemId: entry.itemId, quantidade: Number(entry.quantidade ?? 1) || 1 }));
+  return entries.reduce((result, entry) => {
+    const existing = result.find((item) => item.itemId === entry.itemId);
+    if (existing) existing.quantidade += entry.quantidade;
+    else result.push({ ...entry });
+    return result;
+  }, []);
+}
+
+function getPrototypeAlchemySelectionPrice(selection, items) {
+  return selection.reduce((total, entry) => {
+    const item = items.find((catalogItem) => catalogItem.id === entry.itemId);
+    return total + getItemPrice(item) * Number(entry.quantidade ?? 1);
+  }, 0);
+}
+
+function getPrototypeAlchemySelectionQuantity(selection) {
+  return selection.reduce((total, entry) => total + Number(entry.quantidade ?? 1), 0);
+}
+
 function getItemPrice(item) {
   const value = Number(item?.preco?.valor);
   return Number.isFinite(value) ? value : 0;
@@ -1022,6 +1123,10 @@ function getItemPrice(item) {
 
 function formatPrototypePrice(value) {
   return `T$ ${String(value).replace(".", ",")}`;
+}
+
+function formatPrototypeNumber(value) {
+  return String(value).replace(".", ",");
 }
 
 const PROTOTYPE_SHOP_TABS = [
@@ -1087,6 +1192,37 @@ function PrototypeSuperiorItemShop({ items, selectedItemId, onClose, onSelect })
       </div>
       <PrototypeShopFilters activeTab={currentTab} filters={filters} items={tabItems} onToggle={toggleFilter} />
       <PrototypeShopTable activeTab={currentTab} currentItemId={selectedItemId} items={visibleItems} onSelect={onSelect} />
+    </div>
+  );
+}
+
+function PrototypeAlchemyShop({ items, selectedItemIds, onClose, onSelect }) {
+  const [filters, setFilters] = useState({ generalCategory: [] });
+  const visibleItems = filterPrototypeShopItems(items, "general", filters);
+
+  function toggleFilter(key, value) {
+    setFilters((current) => {
+      const values = current[key] ?? [];
+      return {
+        ...current,
+        [key]: values.includes(value) ? [] : [value]
+      };
+    });
+  }
+
+  return (
+    <div className="origin-item-dialog class-prototype-shop" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="false" aria-label="Escolher alquímico">
+      <div className="origin-item-dialog__header">
+        <div>
+          <strong>Escolher alquímico</strong>
+          <span>Até 10 unidades ou T$ {PROTOTYPE_PRICE_LIMIT}</span>
+        </div>
+        <button className="icon-button" onClick={onClose} type="button">
+          ×
+        </button>
+      </div>
+      <PrototypeShopFilters activeTab="general" filters={filters} items={items} onToggle={toggleFilter} />
+      <PrototypeShopTable activeTab="general" currentItemId="" items={visibleItems} onSelect={onSelect} selectedItemIds={selectedItemIds} />
     </div>
   );
 }

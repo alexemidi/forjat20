@@ -444,6 +444,12 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = [], origemRegion
       return;
     }
 
+    if (String(selectedItemId).startsWith("colecao_de_livros:")) {
+      const pericia = String(selectedItemId).split(":").at(-1);
+      addItem("colecao_de_livros", 1, `Coleção de Livros (${capitalizeDebugLabel(pericia)})`);
+      return;
+    }
+
     if (selectedItemId) {
       addItem(selectedItemId, 1, ORIGIN_SPECIAL_ITEM_LABELS[selectedItemId] ?? "");
       return;
@@ -486,7 +492,10 @@ function montarMochilaDebug(draft, catalogs, origem, pericias = [], origemRegion
     const suffix = improvementNames.length ? ` (${improvementNames.join(", ")})` : "";
     addItem(prototipo.itemSuperior.itemId, 1, item ? `${item.nome}${suffix}` : "", selectedImprovementIds);
   }
-  (prototipo.alquimicos ?? []).forEach((itemId) => addItem(itemId));
+  (prototipo.alquimicos ?? []).forEach((entry) => {
+    if (typeof entry === "string") addItem(entry);
+    else addItem(entry.itemId, Number(entry.quantidade ?? 1) || 1);
+  });
   (draft.escolhas?.equipamentoInicialIds ?? []).forEach((itemId) => addItem(itemId));
   (draft.inventario?.itens ?? []).forEach((item) => addItem(item.itemId, Number(item.quantidade ?? 1) || 1));
 
@@ -583,6 +592,11 @@ function coletarProficienciasOrigemRegional(origemRegional) {
 function getDebugPrototypeImprovementIds(itemSuperior) {
   if (Array.isArray(itemSuperior?.melhoriaIds)) return itemSuperior.melhoriaIds.filter(Boolean);
   return itemSuperior?.melhoriaId ? [itemSuperior.melhoriaId] : [];
+}
+
+function capitalizeDebugLabel(value) {
+  const text = String(value ?? "").replace(/_/g, " ");
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
 }
 
 function normalizeDebugText(value) {

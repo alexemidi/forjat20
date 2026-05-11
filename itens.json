@@ -329,6 +329,106 @@
       ]
     },
     {
+      "id": "ferramenta_agricola",
+      "nome": "Ferramenta Agrícola",
+      "tipo": "arma",
+      "categoriaId": "simples",
+      "livroOrigemId": "basico",
+      "preco": {
+        "valor": 2,
+        "moeda": "T$"
+      },
+      "espacos": 1,
+      "equipamento": {
+        "equipavel": true,
+        "slotsPermitidos": [
+          "mao_direita",
+          "mao_esquerda"
+        ],
+        "ocupaMao": true,
+        "itemVestido": false
+      },
+      "textos": {
+        "habilidade": "Mesmas estatísticas de uma lança.",
+        "variavel": "",
+        "descricao": "Ferramenta agrícola usada como arma improvisada, recebida por algumas origens."
+      },
+      "arma": {
+        "combateId": "corpo_a_corpo",
+        "empunhaduraId": "uma_mao",
+        "dano": {
+          "principal": "1d6",
+          "alternativas": []
+        },
+        "critico": {
+          "margem": 20,
+          "multiplicador": 2
+        },
+        "alcanceId": "curto",
+        "tipoDanoIds": [
+          "perfuracao"
+        ],
+        "propriedadesIds": [
+          "arremesso"
+        ],
+        "gruposArmaIds": [
+          "armas_marinhas"
+        ]
+      },
+      "efeitos": [],
+      "livrosOrigemIds": [
+        "basico"
+      ]
+    },
+    {
+      "id": "ferramenta_pesada",
+      "nome": "Ferramenta Pesada",
+      "tipo": "arma",
+      "categoriaId": "simples",
+      "livroOrigemId": "basico",
+      "preco": {
+        "valor": 12,
+        "moeda": "T$"
+      },
+      "espacos": 1,
+      "equipamento": {
+        "equipavel": true,
+        "slotsPermitidos": [
+          "mao_direita",
+          "mao_esquerda"
+        ],
+        "ocupaMao": true,
+        "itemVestido": false
+      },
+      "textos": {
+        "habilidade": "Mesmas estatísticas de uma maça.",
+        "variavel": "",
+        "descricao": "Ferramenta pesada usada como arma improvisada, recebida por algumas origens."
+      },
+      "arma": {
+        "combateId": "corpo_a_corpo",
+        "empunhaduraId": "uma_mao",
+        "dano": {
+          "principal": "1d8",
+          "alternativas": []
+        },
+        "critico": {
+          "margem": 20,
+          "multiplicador": 2
+        },
+        "alcanceId": null,
+        "tipoDanoIds": [
+          "impacto"
+        ],
+        "propriedadesIds": [],
+        "gruposArmaIds": []
+      },
+      "efeitos": [],
+      "livrosOrigemIds": [
+        "basico"
+      ]
+    },
+    {
       "id": "bordao",
       "nome": "Bordão",
       "tipo": "arma",

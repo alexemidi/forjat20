@@ -38,6 +38,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const escolhasClasse = draft.escolhas.classe ?? {};
   const escolhasOrigem = draft.escolhas.origem ?? {};
   const escolhasOrigemRegional = draft.escolhas.origemRegional ?? {};
+  const origem = catalogs.origins?.find((origin) => (origin.id ?? origin.nome) === draft.info.origemId);
   const origemRegional = catalogs.regionalOrigins?.find((origin) => (origin.id ?? origin.nome) === draft.info.origemRegionalId);
   const bonusNivelPericia = calcularBonusNivelPericia(nivel);
   const bonusTamanhoFurtividade = Number(options.bonusTamanhoFurtividade ?? 0);
@@ -63,6 +64,7 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
   const periciasRegionais = getPericiasRegionais(origemRegional, escolhasOrigemRegional, treinadasAntesRegional);
   const oficiosSelecionados = getSelectedOficios(escolhasClasse, escolhasOrigem, origemRegional);
   const bonusRegional = getBonusPericiasRegionais(origemRegional);
+  const bonusOrigem = getBonusPericiasOrigem(origem, escolhasOrigem);
   const consideradasSemTreino = getPericiasConsideradasTreinadasRegionais(origemRegional);
   const bonusRacial = race ? calcularBonusPericiasRaciais(race, raceChoices) : {};
   const bonusPericiasItens = coletarBonusPericiasMelhorias(draft, catalogs);
@@ -82,11 +84,12 @@ export function calcularPericiasPersonagem(draft, catalogs, options = {}) {
     const atributoValor = Number(attrs[pericia.atributo] ?? 0);
     const racial = Number(bonusRacial[pericia.id] ?? 0);
     const regional = Number(bonusRegional[pericia.id] ?? 0);
+    const origemBonus = Number(bonusOrigem[pericia.id] ?? 0);
     const tamanho = pericia.id === "furtividade" ? bonusTamanhoFurtividade : 0;
     const liberadaSemTreino = consideradasSemTreino.has(pericia.id);
     const bloqueada = Boolean(pericia.requerTreinamento && !treinada && !liberadaSemTreino);
     const bonusItem = bloqueada ? 0 : Number(bonusPericiasItens[pericia.id] ?? 0);
-    const bonusDiversos = racial + regional + tamanho + bonusItem;
+    const bonusDiversos = racial + regional + origemBonus + tamanho + bonusItem;
     const bonusTreino = calcularBonusTreinamentoPericia(nivel, treinada);
     const total = bloqueada
       ? bonusDiversos
@@ -223,6 +226,28 @@ function getBonusPericiasRegionais(origemRegional) {
     bonus[entry.id] = Number(bonus[entry.id] ?? 0) + Number(entry.valor ?? 0);
   });
   return bonus;
+}
+
+function getBonusPericiasOrigem(origem, escolhasOrigem = {}) {
+  if (!origem) return {};
+  const bonus = {};
+  (origem.itens ?? [])
+    .filter((itemText) => !normalizarPericiaId(itemText).includes("colecao_de_livros"))
+    .flatMap((itemText) => extractRegionalSkillBonuses(itemText))
+    .forEach((entry) => {
+      bonus[entry.id] = Number(bonus[entry.id] ?? 0) + Number(entry.valor ?? 0);
+    });
+  Object.values(escolhasOrigem.itens ?? {}).forEach((value) => {
+    const periciaId = getSkillBonusFromOriginItemChoice(value);
+    if (periciaId) bonus[periciaId] = Number(bonus[periciaId] ?? 0) + 1;
+  });
+  return bonus;
+}
+
+function getSkillBonusFromOriginItemChoice(value) {
+  const id = String(value ?? "");
+  if (!id.startsWith("colecao_de_livros:")) return "";
+  return normalizarPericiaId(id.split(":").at(-1));
 }
 
 function getPericiasConsideradasTreinadasRegionais(origemRegional) {

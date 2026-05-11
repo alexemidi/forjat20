@@ -611,6 +611,18 @@ function getOriginItemEntries(origin, items, selectedOficios = []) {
         options: getArtistItemOptions(items)
       };
     }
+    if (isBookCollectionChoice(itemText)) {
+      return {
+        id: `item_${index}`,
+        nome: "Coleção de Livros",
+        descricao: "Escolha a perícia beneficiada pela coleção.",
+        options: [
+          { id: "colecao_de_livros:guerra", nome: "Coleção de Livros de Guerra" },
+          { id: "colecao_de_livros:misticismo", nome: "Coleção de Livros de Misticismo" },
+          { id: "colecao_de_livros:nobreza", nome: "Coleção de Livros de Nobreza" }
+        ]
+      };
+    }
     if (isRangedSimpleOrMartialWeaponChoice(itemText)) {
       return {
         id: `item_${index}`,
@@ -811,6 +823,11 @@ function getSuperiorItemCategory(item) {
 function isArtistChoice(itemText) {
   const normalized = normalizeText(itemText);
   return normalized.includes("estojo de disfarces") && normalized.includes("instrumento musical");
+}
+
+function isBookCollectionChoice(itemText) {
+  const normalized = normalizeText(itemText);
+  return normalized.includes("colecao de livros") && normalized.includes("guerra") && normalized.includes("misticismo") && normalized.includes("nobreza");
 }
 
 function getArtistItemOptions(items) {
